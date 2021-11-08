@@ -36,58 +36,10 @@ class ReaderChapter extends StatelessWidget {
     return paragraghsB;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    List<dom.Element> paragraghs = [];
-
-    late List renderChapters;
-    dom.Element? contentBody = parse(doc.Content, encoding: 'text/html').body;
-    paragraghs.addAll(getElements(contentBody!.children));
-    renderChapters = paragraghs.map((element) {
-      // ? Display images if exists
-      if (element.localName == "div") {
-        if (element.getElementsByTagName("img").isNotEmpty) {
-          return Html(
-            data: element.outerHtml,
-            customRender: {
-              'img': (RenderContext contextR, Widget child) {
-                final local = contextR.tree.element!.attributes['src']!
-                    .replaceAll('../', '');
-                final image = Uint8List.fromList(
-                    controller.document.Content!.Images![local]!.Content!);
-                return image_import.Image.memory(image);
-              },
-            },
-          );
-        } else if (element.getElementsByTagName("h1").isNotEmpty ||
-            element.getElementsByTagName("h2").isNotEmpty ||
-            element.getElementsByTagName("h3").isNotEmpty) {
-          // ? Display h1 or h2 if there h
-          return Html(data: element.outerHtml);
-        } else {
-          // ? Display selectable text
-          final finalParagraph = element.text;
-          if (finalParagraph.isNotEmpty) {
-            if (element.outerHtml.contains("<br")) {
-              return HtmlPragragh(
-                paragragh: finalParagraph,
-              );
-            } else {
-              return HtmlPragragh(
-                paragragh: finalParagraph.replaceAll("\n", " "),
-              );
-            }
-          }
-        }
-      } else if (element.getElementsByTagName("table").isNotEmpty) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Html(
-            data: element.outerHtml,
-          ),
-        );
-      } else if (element.localName == "image" ||
-          element.getElementsByTagName("image").isNotEmpty) {
+  Widget? settingTheElement(dom.Element element) {
+    // ? Display images if exists
+    if (element.localName == "div") {
+      if (element.getElementsByTagName("img").isNotEmpty) {
         return Html(
           data: element.outerHtml,
           customRender: {
@@ -100,24 +52,148 @@ class ReaderChapter extends StatelessWidget {
             },
           },
         );
-      } else if (element.localName == "p") {
+      } else if (element.getElementsByTagName("h1").isNotEmpty ||
+          element.getElementsByTagName("h2").isNotEmpty ||
+          element.getElementsByTagName("h3").isNotEmpty) {
+        // ? Display h1 or h2 if there h
+        return Html(data: element.outerHtml);
+      } else {
+        // ? Display selectable text
         final finalParagraph = element.text;
         if (finalParagraph.isNotEmpty) {
           if (element.outerHtml.contains("<br")) {
             return HtmlPragragh(
               paragragh: finalParagraph,
             );
+          } else {
+            return HtmlPragragh(
+              paragragh: finalParagraph.replaceAll("\n", " "),
+            );
           }
+        }
+      }
+    } else if (element.getElementsByTagName("table").isNotEmpty) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Html(
+          data: element.outerHtml,
+        ),
+      );
+    } else if (element.localName == "image" ||
+        element.getElementsByTagName("image").isNotEmpty) {
+      return Html(
+        data: element.outerHtml,
+        customRender: {
+          'img': (RenderContext contextR, Widget child) {
+            final local =
+                contextR.tree.element!.attributes['src']!.replaceAll('../', '');
+            final image = Uint8List.fromList(
+                controller.document.Content!.Images![local]!.Content!);
+            return image_import.Image.memory(image);
+          },
+        },
+      );
+    } else if (element.localName == "p") {
+      final finalParagraph = element.text;
+      if (finalParagraph.isNotEmpty) {
+        if (element.outerHtml.contains("<br")) {
           return HtmlPragragh(
-            paragragh: finalParagraph.replaceAll("\n", " "),
+            paragragh: finalParagraph,
           );
         }
-      } else {
-        return Html(
-          data: element.outerHtml,
+        return HtmlPragragh(
+          paragragh: finalParagraph.replaceAll("\n", " "),
         );
       }
-    }).toList();
+    } else {
+      return Html(
+        data: element.outerHtml,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    List<dom.Element> paragraghs = [];
+
+    late List renderChapters;
+    dom.Element? contentBody = parse(doc.Content, encoding: 'text/html').body;
+    paragraghs.addAll(getElements(contentBody!.children));
+    // renderChapters = paragraghs.map((element) {
+    //   // ? Display images if exists
+    //   if (element.localName == "div") {
+    //     if (element.getElementsByTagName("img").isNotEmpty) {
+    //       return Html(
+    //         data: element.outerHtml,
+    //         customRender: {
+    //           'img': (RenderContext contextR, Widget child) {
+    //             final local = contextR.tree.element!.attributes['src']!
+    //                 .replaceAll('../', '');
+    //             final image = Uint8List.fromList(
+    //                 controller.document.Content!.Images![local]!.Content!);
+    //             return image_import.Image.memory(image);
+    //           },
+    //         },
+    //       );
+    //     } else if (element.getElementsByTagName("h1").isNotEmpty ||
+    //         element.getElementsByTagName("h2").isNotEmpty ||
+    //         element.getElementsByTagName("h3").isNotEmpty) {
+    //       // ? Display h1 or h2 if there h
+    //       return Html(data: element.outerHtml);
+    //     } else {
+    //       // ? Display selectable text
+    //       final finalParagraph = element.text;
+    //       if (finalParagraph.isNotEmpty) {
+    //         if (element.outerHtml.contains("<br")) {
+    //           return HtmlPragragh(
+    //             paragragh: finalParagraph,
+    //           );
+    //         } else {
+    //           return HtmlPragragh(
+    //             paragragh: finalParagraph.replaceAll("\n", " "),
+    //           );
+    //         }
+    //       }
+    //     }
+    //   } else if (element.getElementsByTagName("table").isNotEmpty) {
+    //     return SingleChildScrollView(
+    //       scrollDirection: Axis.horizontal,
+    //       child: Html(
+    //         data: element.outerHtml,
+    //       ),
+    //     );
+    //   } else if (element.localName == "image" ||
+    //       element.getElementsByTagName("image").isNotEmpty) {
+    //     return Html(
+    //       data: element.outerHtml,
+    //       customRender: {
+    //         'img': (RenderContext contextR, Widget child) {
+    //           final local = contextR.tree.element!.attributes['src']!
+    //               .replaceAll('../', '');
+    //           final image = Uint8List.fromList(
+    //               controller.document.Content!.Images![local]!.Content!);
+    //           return image_import.Image.memory(image);
+    //         },
+    //       },
+    //     );
+    //   } else if (element.localName == "p") {
+    //     final finalParagraph = element.text;
+    //     if (finalParagraph.isNotEmpty) {
+    //       if (element.outerHtml.contains("<br")) {
+    //         return HtmlPragragh(
+    //           paragragh: finalParagraph,
+    //         );
+    //       }
+    //       return HtmlPragragh(
+    //         paragragh: finalParagraph.replaceAll("\n", " "),
+    //       );
+    //     }
+    //   } else {
+    //     return Html(
+    //       data: element.outerHtml,
+    //     );
+    //   }
+    // }).toList();
 
     final ItemPositionsListener itemPositionsListener =
         ItemPositionsListener.create();
@@ -131,8 +207,10 @@ class ReaderChapter extends StatelessWidget {
               initialAlignment: isLastChapter ? controller.lastAlineo : 0.0,
               initialScrollIndex:
                   isLastChapter ? controller.lastChapterScroll : 0,
-              itemCount: renderChapters.length,
-              itemBuilder: (context, index) => renderChapters.elementAt(index),
+              itemCount: paragraghs.length,
+              itemBuilder: (context, index) =>
+                  settingTheElement(paragraghs.elementAt(index)) ??
+                  const SizedBox(),
               itemPositionsListener: itemPositionsListener,
               itemScrollController: scroll),
         ),
