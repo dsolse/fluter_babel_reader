@@ -48,13 +48,8 @@ class DrawerReader extends StatelessWidget {
     List<Map> booksTitles = [];
     int valueTitle = 0;
     for (var titleR in listFiles) {
-      final title = titleR.text.replaceAll("\n", " ").replaceAll("  ", "");
-
-      if (titleR.localName != "p" &&
-          // title.length < 40 &&
-          title.isNotEmpty &&
-          title != " " &&
-          title != "\n") {
+      if (titleR.localName == "title") {
+        final String title = titleR.text;
         booksTitles.add({"titleInt": valueTitle, "titleName": title});
       }
       valueTitle++;

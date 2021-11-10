@@ -3,24 +3,39 @@ import 'package:epubx/epubx.dart';
 import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/chapters/slider_chapter.dart';
 import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/paragrahps/paragraph_book.dart';
 import 'package:final_babel_reader_app/src/utils/ebook_controller.dart';
+import 'package:final_babel_reader_app/src/utils/providers/book_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:flutter/src/widgets/image.dart' as image_import;
 import 'package:html/parser.dart';
+import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-class ReaderChapter extends StatelessWidget {
+class ReaderChapter extends StatefulWidget {
   const ReaderChapter({
     Key? key,
     required this.controller,
+    required this.index,
     required this.doc,
     required this.isLastChapter,
   }) : super(key: key);
 
   final EpubTextContentFile doc;
+  final int index;
   final EbookController controller;
   final bool isLastChapter;
+
+  @override
+  State<ReaderChapter> createState() => _ReaderChapterState();
+}
+
+class _ReaderChapterState extends State<ReaderChapter> {
+  @override
+  void dispose() {
+    print("i was disposed from ${widget.doc.FileName}");
+    super.dispose();
+  }
 
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghsB = [];
@@ -47,7 +62,7 @@ class ReaderChapter extends StatelessWidget {
               final local = contextR.tree.element!.attributes['src']!
                   .replaceAll('../', '');
               final image = Uint8List.fromList(
-                  controller.document.Content!.Images![local]!.Content!);
+                  widget.controller.document.Content!.Images![local]!.Content!);
               return image_import.Image.memory(image);
             },
           },
@@ -88,7 +103,7 @@ class ReaderChapter extends StatelessWidget {
             final local =
                 contextR.tree.element!.attributes['src']!.replaceAll('../', '');
             final image = Uint8List.fromList(
-                controller.document.Content!.Images![local]!.Content!);
+                widget.controller.document.Content!.Images![local]!.Content!);
             return image_import.Image.memory(image);
           },
         },
@@ -116,8 +131,9 @@ class ReaderChapter extends StatelessWidget {
   Widget build(BuildContext context) {
     List<dom.Element> paragraghs = [];
 
-    late List renderChapters;
-    dom.Element? contentBody = parse(doc.Content, encoding: 'text/html').body;
+    // late List renderChapters;
+    dom.Element? contentBody =
+        parse(widget.doc.Content, encoding: 'text/html').body;
     paragraghs.addAll(getElements(contentBody!.children));
     // renderChapters = paragraghs.map((element) {
     //   // ? Display images if exists
@@ -204,9 +220,11 @@ class ReaderChapter extends StatelessWidget {
         Expanded(
           flex: 40,
           child: ScrollablePositionedList.builder(
-              initialAlignment: isLastChapter ? controller.lastAlineo : 0.0,
-              initialScrollIndex:
-                  isLastChapter ? controller.lastChapterScroll : 0,
+              initialAlignment:
+                  widget.isLastChapter ? widget.controller.lastAlineo : 0.0,
+              initialScrollIndex: widget.isLastChapter
+                  ? widget.controller.lastChapterScroll
+                  : 0,
               itemCount: paragraghs.length,
               itemBuilder: (context, index) =>
                   settingTheElement(paragraghs.elementAt(index)) ??
@@ -214,13 +232,12 @@ class ReaderChapter extends StatelessWidget {
               itemPositionsListener: itemPositionsListener,
               itemScrollController: scroll),
         ),
-        // const Expanded(flex: 3, child: SelectableText("Hola")),
         if (paragraghs.length > 1)
           Expanded(
             flex: 5,
             child: SliderChapter(
                 min: 0,
-                controller: controller,
+                controller: widget.controller,
                 max: (paragraghs.length - 1).toDouble(),
                 setValueScroll: (value) {
                   scroll.jumpTo(

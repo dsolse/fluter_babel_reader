@@ -6,6 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'my_text_seletion.dart';
+
 class HtmlPragragh extends StatelessWidget {
   const HtmlPragragh({
     Key? key,
@@ -96,7 +98,7 @@ class HtmlPragragh extends StatelessWidget {
     return Padding(
       padding:
           const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 4.0, top: 0.0),
-      child: SelectableText.rich(
+      child: Text.rich(
         TextSpan(
           style: TextStyle(
             color: isDark ? dataT.textColorDM : dataT.textColorLM,
@@ -104,14 +106,14 @@ class HtmlPragragh extends StatelessWidget {
           ),
           children: splitSentence,
         ),
-        //   selectionControls: MyMaterialTextSelectionControls(
-        //     changeTitle: (String word) => data.updateTitle(word),
-        //     changeSelectedWords: (String word) => dataT.updateSelectedWords(word),
-        //     langFrom: data.language,
-        //     langTo: data.toTranslate,
-        //     tileBook: data.titleBook,
-        //     paragraph: paragragh,
-        //   ),
+        // selectionControls: MyMaterialTextSelectionControls(
+        //   changeTitle: (String word) => data.updateTitle(word),
+        //   changeSelectedWords: (String word) => dataT.updateSelectedWords(word),
+        //   langFrom: data.language,
+        //   langTo: data.toTranslate,
+        //   tileBook: data.titleBook,
+        //   paragraph: paragragh,
+        // ),
       ),
     );
   }

@@ -76,60 +76,20 @@ class EbookReaderFuture extends StatelessWidget {
   }
 }
 
-class EbookReaderScafold extends StatelessWidget {
+class EbookReaderScafold extends StatefulWidget {
   const EbookReaderScafold({
     Key? key,
     required this.data,
   }) : super(key: key);
   final EbookData data;
 
-//   @override
-//   State<EbookReaderScafold> createState() => _EbookReaderScafoldState();
-// }
+  @override
+  State<EbookReaderScafold> createState() => _EbookReaderScafoldState();
+}
 
-// class _EbookReaderScafoldState extends State<EbookReaderScafold> {
-  // late EbookController controller;
-  // late List<dom.Element> listView;
-  // bool valueS = true;
-  // // @override
-  // // void initState() {
-  //   // print(widget.data.ebook.Content?.Html?.values.first.FileName);
-  //   controller = EbookController(
-  //       lastAlineo: widget.data.position!.lastAlineo!,
-  //       lastChapterindex: widget.data.position!.lastChapter!,
-  //       lastChapterScroll: widget.data.position!.lastIndex!,
-  //       chaptersController:
-  //           PageController(initialPage: widget.data.position!.lastChapter!),
-  //       document: widget.data.ebook,
-  //       fileList: List.from(
-  //           widget.data.ebook.Content?.Html?.values ?? const Iterable.empty()));
-
-  //   listView = controller.fileList.map((e) {
-  //     final elements = getElements(parse(e.Content).body!.children);
-  //     // print(parse(e.Content, encoding: "utf8").outerHtml);
-  //     if (elements.isNotEmpty) {
-  //       if (elements.first.getElementsByTagName("img").isNotEmpty &&
-  //           elements.length > 1) {
-  //         return elements.elementAt(1);
-  //       } else {
-  //         if (elements.first.children.length > 1) {
-  //           return elements.first.children.first;
-  //         }
-  //         return elements.first;
-  //       }
-  //     } else {
-  //       final elements2 =
-  //           getElements(parse(e.Content, encoding: "utf8").children);
-  //       if (elements2.first.getElementsByTagName("img").isNotEmpty &&
-  //           elements2.length > 1) {
-  //         return elements2.elementAt(1);
-  //       } else {
-  //         return elements2.first;
-  //       }
-  //     }
-  //   }).toList();
-  // super.initState();
-  // }
+class _EbookReaderScafoldState extends State<EbookReaderScafold> {
+  late EbookController controller;
+  late List<dom.Element> listView;
 
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghs = [];
@@ -146,47 +106,34 @@ class EbookReaderScafold extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
-    late EbookController controller;
-    late List<dom.Element> listView;
-    bool valueS = true;
-    // @override
-    // void initState() {
-    // print(widget.data.ebook.Content?.Html?.values.first.FileName);
+  void initState() {
     controller = EbookController(
-        lastAlineo: data.position!.lastAlineo!,
-        lastChapterindex: data.position!.lastChapter!,
-        lastChapterScroll: data.position!.lastIndex!,
+        lastAlineo: widget.data.position!.lastAlineo!,
+        lastChapterindex: widget.data.position!.lastChapter!,
+        lastChapterScroll: widget.data.position!.lastIndex!,
         chaptersController:
-            PageController(initialPage: data.position!.lastChapter!),
-        document: data.ebook,
+            PageController(initialPage: widget.data.position!.lastChapter!),
+        document: widget.data.ebook,
         fileList: List.from(
-            data.ebook.Content?.Html?.values ?? const Iterable.empty()));
-
+            widget.data.ebook.Content?.Html?.values ?? const Iterable.empty()));
     listView = controller.fileList.map((e) {
-      final elements = getElements(parse(e.Content).body!.children);
-      // print(parse(e.Content, encoding: "utf8").outerHtml);
-      if (elements.isNotEmpty) {
-        if (elements.first.getElementsByTagName("img").isNotEmpty &&
-            elements.length > 1) {
-          return elements.elementAt(1);
-        } else {
-          if (elements.first.children.length > 1) {
-            return elements.first.children.first;
-          }
-          return elements.first;
-        }
+      final elements =
+          getElements(parse(e.Content).getElementsByTagName("title"));
+      if (elements.isNotEmpty &&
+          elements.first.text != controller.document.Title) {
+        return elements.first;
       } else {
-        final elements2 =
-            getElements(parse(e.Content, encoding: "utf8").children);
-        if (elements2.first.getElementsByTagName("img").isNotEmpty &&
-            elements2.length > 1) {
-          return elements2.elementAt(1);
-        } else {
-          return elements2.first;
-        }
+        return dom.Element.html("<p>None</p>");
       }
     }).toList();
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    bool valueS = true;
+
     return Scaffold(
       appBar: AppBar(
         title: Consumer<BookData>(

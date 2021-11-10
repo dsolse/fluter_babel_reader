@@ -62,7 +62,9 @@ class ReaderConstructor extends StatelessWidget {
           } else {
             isLastChapter = false;
           }
+          // return Text(fileList.elementAt(itemIndex).Content ?? "");
           return ReaderChapter(
+            index: itemIndex,
             controller: controller,
             doc: fileList.elementAt(itemIndex),
             isLastChapter: isLastChapter,
@@ -70,27 +72,6 @@ class ReaderConstructor extends StatelessWidget {
         }
       },
       itemCount: fileList.length + 1,
-
-      // itemBuilder: (BuildContext context, int itemIndex) {
-      //   if (itemIndex == fileList.length) {
-      //     return const Center(
-      //       child: Text("End"),
-      //     );
-      //   } else {
-      //     late bool isLastChapter;
-      //     if (controller.lastChapterindex == itemIndex && num == 0) {
-      //       isLastChapter = true;
-      //       num++;
-      //     } else {
-      //       isLastChapter = false;
-      //     }
-      //     return ReaderChapter(
-      //       controller: controller,
-      //       doc: fileList.elementAt(itemIndex),
-      //       isLastChapter: isLastChapter,
-      //     );
-      //   }
-      // },
     );
   }
 }
