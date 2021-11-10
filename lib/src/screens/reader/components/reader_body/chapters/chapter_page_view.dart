@@ -10,13 +10,15 @@ import 'package:provider/provider.dart';
 import 'chapter_list_view.dart';
 
 class ReaderConstructor extends StatelessWidget {
-  const ReaderConstructor({
+  ReaderConstructor({
     Key? key,
     required this.val,
     required this.controller,
   }) : super(key: key);
   final EbookController controller;
   final bool val;
+  final ValueNotifier<Widget> buildCount =
+      ValueNotifier<Widget>(const Text("Loading"));
 
   void loadWords(BuildContext context) async {
     final db = DBHelper();
@@ -39,9 +41,27 @@ class ReaderConstructor extends StatelessWidget {
 
     final db = DBHelper();
 
+    buildCount.value = ReaderChapter(
+      index: controller.lastChapterindex,
+      controller: controller,
+      doc: fileList.elementAt(controller.lastChapterindex),
+      isLastChapter: false,
+    );
+
     return PageView.builder(
       controller: controller.chaptersController,
       onPageChanged: (index) async {
+        
+        if (fileList.length != index) {
+          buildCount.value = ReaderChapter(
+            index: controller.lastChapterindex,
+            controller: controller,
+            doc: fileList.elementAt(index),
+            isLastChapter: false,
+          );
+        }
+
+        // print(pagesVisited.elementAt(pagesVisited.length - 2));
         bookDataProvider.updateindexChapter(index);
         await db.updateLastChapterIndex(
           index,
@@ -62,13 +82,19 @@ class ReaderConstructor extends StatelessWidget {
           } else {
             isLastChapter = false;
           }
-          // return Text(fileList.elementAt(itemIndex).Content ?? "");
+          // return SizedBox(
+          //   child: ValueListenableBuilder<Widget>(
+          //       valueListenable: buildCount,
+          //       builder: (context, val, child) {
+          //         return val;
           return ReaderChapter(
             index: itemIndex,
             controller: controller,
             doc: fileList.elementAt(itemIndex),
             isLastChapter: isLastChapter,
           );
+          // }),
+          // );
         }
       },
       itemCount: fileList.length + 1,

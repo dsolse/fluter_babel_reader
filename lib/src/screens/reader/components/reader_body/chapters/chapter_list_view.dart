@@ -3,13 +3,11 @@ import 'package:epubx/epubx.dart';
 import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/chapters/slider_chapter.dart';
 import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/paragrahps/paragraph_book.dart';
 import 'package:final_babel_reader_app/src/utils/ebook_controller.dart';
-import 'package:final_babel_reader_app/src/utils/providers/book_data_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:flutter/src/widgets/image.dart' as image_import;
 import 'package:html/parser.dart';
-import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ReaderChapter extends StatefulWidget {
@@ -31,12 +29,6 @@ class ReaderChapter extends StatefulWidget {
 }
 
 class _ReaderChapterState extends State<ReaderChapter> {
-  @override
-  void dispose() {
-    print("i was disposed from ${widget.doc.FileName}");
-    super.dispose();
-  }
-
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghsB = [];
 
@@ -71,6 +63,8 @@ class _ReaderChapterState extends State<ReaderChapter> {
           element.getElementsByTagName("h2").isNotEmpty ||
           element.getElementsByTagName("h3").isNotEmpty) {
         // ? Display h1 or h2 if there h
+        return Html(data: element.outerHtml);
+      } else if (element.getElementsByTagName("li").isNotEmpty) {
         return Html(data: element.outerHtml);
       } else {
         // ? Display selectable text
@@ -127,93 +121,41 @@ class _ReaderChapterState extends State<ReaderChapter> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    List<dom.Element> paragraghs = [];
+  List<dom.Element> paragraghs = [];
 
-    // late List renderChapters;
+  @override
+  void initState() {
     dom.Element? contentBody =
         parse(widget.doc.Content, encoding: 'text/html').body;
     paragraghs.addAll(getElements(contentBody!.children));
-    // renderChapters = paragraghs.map((element) {
-    //   // ? Display images if exists
-    //   if (element.localName == "div") {
-    //     if (element.getElementsByTagName("img").isNotEmpty) {
-    //       return Html(
-    //         data: element.outerHtml,
-    //         customRender: {
-    //           'img': (RenderContext contextR, Widget child) {
-    //             final local = contextR.tree.element!.attributes['src']!
-    //                 .replaceAll('../', '');
-    //             final image = Uint8List.fromList(
-    //                 controller.document.Content!.Images![local]!.Content!);
-    //             return image_import.Image.memory(image);
-    //           },
-    //         },
-    //       );
-    //     } else if (element.getElementsByTagName("h1").isNotEmpty ||
-    //         element.getElementsByTagName("h2").isNotEmpty ||
-    //         element.getElementsByTagName("h3").isNotEmpty) {
-    //       // ? Display h1 or h2 if there h
-    //       return Html(data: element.outerHtml);
-    //     } else {
-    //       // ? Display selectable text
-    //       final finalParagraph = element.text;
-    //       if (finalParagraph.isNotEmpty) {
-    //         if (element.outerHtml.contains("<br")) {
-    //           return HtmlPragragh(
-    //             paragragh: finalParagraph,
-    //           );
-    //         } else {
-    //           return HtmlPragragh(
-    //             paragragh: finalParagraph.replaceAll("\n", " "),
-    //           );
-    //         }
-    //       }
-    //     }
-    //   } else if (element.getElementsByTagName("table").isNotEmpty) {
-    //     return SingleChildScrollView(
-    //       scrollDirection: Axis.horizontal,
-    //       child: Html(
-    //         data: element.outerHtml,
-    //       ),
-    //     );
-    //   } else if (element.localName == "image" ||
-    //       element.getElementsByTagName("image").isNotEmpty) {
-    //     return Html(
-    //       data: element.outerHtml,
-    //       customRender: {
-    //         'img': (RenderContext contextR, Widget child) {
-    //           final local = contextR.tree.element!.attributes['src']!
-    //               .replaceAll('../', '');
-    //           final image = Uint8List.fromList(
-    //               controller.document.Content!.Images![local]!.Content!);
-    //           return image_import.Image.memory(image);
-    //         },
-    //       },
-    //     );
-    //   } else if (element.localName == "p") {
-    //     final finalParagraph = element.text;
-    //     if (finalParagraph.isNotEmpty) {
-    //       if (element.outerHtml.contains("<br")) {
-    //         return HtmlPragragh(
-    //           paragragh: finalParagraph,
-    //         );
-    //       }
-    //       return HtmlPragragh(
-    //         paragragh: finalParagraph.replaceAll("\n", " "),
-    //       );
-    //     }
-    //   } else {
-    //     return Html(
-    //       data: element.outerHtml,
-    //     );
-    //   }
-    // }).toList();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.controller.chaptersController.addListener(() {
+      if (mounted) {
+        if ((widget.controller.chaptersController.page ?? 0.1) % 1 == 0) {
+          if ((widget.controller.chaptersController.page ?? widget.index)
+                  .toInt() !=
+              widget.index) {
+            if (mounted) {
+              paragraghs.clear();
+              setState(() {
+                paragraghs = [];
+              });
+            }
+          }
+        }
+      }
+    });
 
     final ItemPositionsListener itemPositionsListener =
         ItemPositionsListener.create();
     final ItemScrollController scroll = ItemScrollController();
+    // itemPositionsListener.itemPositions.addListener(() {
+    //   print(itemPositionsListener.itemPositions.value);
+    // });
 
     return Column(
       children: [
@@ -234,7 +176,7 @@ class _ReaderChapterState extends State<ReaderChapter> {
         ),
         if (paragraghs.length > 1)
           Expanded(
-            flex: 5,
+            flex: 4,
             child: SliderChapter(
                 min: 0,
                 controller: widget.controller,

@@ -90,6 +90,7 @@ class EbookReaderScafold extends StatefulWidget {
 class _EbookReaderScafoldState extends State<EbookReaderScafold> {
   late EbookController controller;
   late List<dom.Element> listView;
+  late Widget bodyReader;
 
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghs = [];

@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
                 cardColor: Colors.brown,
                 accentColor: Colors.brown),
             textSelectionTheme: const TextSelectionThemeData(
-              selectionColor: backgroundColor,
+              selectionColor: primaryColor,
               cursorColor: primaryColor,
             ),
             primaryColor: primaryColor,

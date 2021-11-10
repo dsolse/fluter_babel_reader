@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:epubx/epubx.dart';
-import 'package:flutter/src/widgets/image.dart' as image;
 import 'package:image/image.dart' as cover;
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';

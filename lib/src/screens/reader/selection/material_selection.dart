@@ -1,12 +1,12 @@
 import 'package:final_babel_reader_app/src/screens/reader/selection/toolbar.dart';
 import 'package:final_babel_reader_app/src/screens/reader/utils/cardview.dart';
 import 'package:final_babel_reader_app/src/utils/page_route.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:translator/translator.dart';
 
-class MyMaterialTextSelectionControls extends MaterialTextSelectionControls {
+class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
   MyMaterialTextSelectionControls(
       {required this.langFrom,
       required this.tileBook,
