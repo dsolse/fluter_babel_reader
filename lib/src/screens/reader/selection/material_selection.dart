@@ -1,5 +1,7 @@
 import 'package:final_babel_reader_app/src/screens/reader/selection/toolbar.dart';
 import 'package:final_babel_reader_app/src/screens/reader/utils/cardview.dart';
+import 'package:final_babel_reader_app/src/utils/data_classes.dart';
+import 'package:final_babel_reader_app/src/utils/db_helper.dart';
 import 'package:final_babel_reader_app/src/utils/page_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +51,17 @@ class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
     changeTitle(textResult);
   }
 
+  void addWord(String selected, String translation, String note) async {
+    final db = DBHelper();
+    if (tileBook.isNotEmpty) {
+      changeSelectedWords(selected);
+      print(selected);
+      print(translation);
+      print(note);
+      // db.addWord(selected, translation, note, tileBook, langFrom);
+    } else {}
+  }
+
   goToMenuAddWord(BuildContext context, TextSelectionDelegate delegate) {
     final String wordSelected = delegate.textEditingValue.text.substring(
         delegate.textEditingValue.selection.start,
@@ -59,11 +72,15 @@ class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
           builder: (context) {
             return CardAddWord(
               word: wordSelected,
-              sentence: paragraph
-                  .split(".")
-                  .where((element) => element.contains(wordSelected))
-                  .first,
-              changeSelectedWords: changeSelectedWords,
+              dataWord: DataWord(
+                  langTo,
+                  langFrom,
+                  tileBook,
+                  paragraph
+                      .split(".")
+                      .where((element) => element.contains(wordSelected))
+                      .first,
+                  changeListWord: addWord),
             );
           },
         ),

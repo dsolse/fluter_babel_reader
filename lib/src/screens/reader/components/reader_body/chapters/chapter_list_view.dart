@@ -15,10 +15,6 @@ import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import "package:flutter_html/src/css_parser.dart" as css;
 
-//  getHtmltags(){
-
-// }
-
 class ReaderChapter extends StatefulWidget {
   const ReaderChapter({
     Key? key,
@@ -55,28 +51,76 @@ class _ReaderChapterState extends State<ReaderChapter> {
 
   Map<String, Style> styleCss = {};
 
-  // Map<String, Style> getCss(String css, OnCssParseError? onCssParseError) {
-  //   final declarations = css.parseExternalCss(css, onCssParseError);
-  //   Map<String, Style> styleMap = {};
-  //   declarations.forEach((key, value) {
-  //     styleMap[key] = declarationsToStyle(value);
-  //   });
-  //   return styleMap;
-  // }
+  dom.Element getElementIfContains(
+      RegExp match, List<String> selectedWords, dom.Element paragraghElement) {
+    final String paragragh = paragraghElement.outerHtml;
+    List<String> splitSentence = [];
 
-  Widget? settingTheElement(dom.Element element) {
+    if (paragragh.contains(match)) {
+      int offset = 0;
+      Iterable matches = match.allMatches(paragragh);
+      int item = 0;
+      for (final result in matches) {
+        // ? Before sentence matching
+        if (result.start > offset && result.start < paragragh.length) {
+          splitSentence.add(
+            paragragh.substring(offset, result.start),
+          );
+        } else {
+          splitSentence.add(
+            paragragh.substring(offset, result.start),
+          );
+        }
+        // ? Sentence matching
+        splitSentence.add(
+          '<a href="word-added"><span>${paragragh.substring(result.start, result.end)}</span></a>',
+        );
+        // ? After all words of sentence matching
+        offset = result.end;
+        if (item == matches.length - 1) {
+          splitSentence.add(
+            paragragh.substring(result.end),
+          );
+        }
+        item++;
+      }
+    } else {
+      // ? Sentence without match
+      splitSentence.add(
+        paragragh,
+      );
+    }
+    return dom.Element.html(splitSentence.join(""));
+  }
+
+  Widget? settingTheElement(dom.Element elemento) {
     // ? Display images if exists
+    late dom.Element element;
 
     final data = Provider.of<BookData>(context, listen: false);
     final dataT = Provider.of<TextData>(context);
+    List<String> wordsToMach = dataT.selectedWords;
+
+    RegExp match = RegExp(r"\b" + wordsToMach.join(r'\b|\b') + r"\b");
+
     final controls = MyMaterialTextSelectionControls(
       changeTitle: (String word) => data.updateTitle(word),
       changeSelectedWords: (String word) => dataT.updateSelectedWords(word),
       langFrom: data.language,
       langTo: data.toTranslate,
       tileBook: data.titleBook,
-      paragraph: element.text,
+      paragraph: elemento.text,
     );
+    if (elemento.text.contains(match)) {
+      element = getElementIfContains(match, dataT.selectedWords, elemento);
+    } else {
+      element = elemento;
+    }
+
+    value(href, rContext, values, element) {
+      print(href);
+      print(values);
+    }
 
     if (element.localName == "div") {
       if (element.getElementsByTagName("img").isNotEmpty) {
@@ -102,6 +146,7 @@ class _ReaderChapterState extends State<ReaderChapter> {
           data: element.outerHtml,
           selectionControls: controls,
           style: styleCss,
+          onLinkTap: value,
         );
       }
     } else if (element.getElementsByTagName("table").isNotEmpty) {
@@ -136,6 +181,7 @@ class _ReaderChapterState extends State<ReaderChapter> {
       return SelectableHtml(
         data: element.outerHtml,
         selectionControls: controls,
+        onLinkTap: value,
         style: styleCss,
       );
     }
@@ -145,8 +191,7 @@ class _ReaderChapterState extends State<ReaderChapter> {
 
   @override
   void initState() {
-    dom.Element? contentBody =
-        parse(widget.doc.Content, encoding: 'text/html').body;
+    dom.Element? contentBody = parse(widget.doc.Content).body;
     paragraghs.addAll(getElements(contentBody!.children));
 
     super.initState();
@@ -183,7 +228,9 @@ class _ReaderChapterState extends State<ReaderChapter> {
     // Expanded(
     // flex: 40,
     // child:
-    return ScrollablePositionedList.builder(
+    return ScrollablePositionedList.separated(
+        separatorBuilder: (context, index) => Divider(
+            thickness: 5, color: Theme.of(context).colorScheme.background),
         initialAlignment:
             widget.isLastChapter ? widget.controller.lastAlineo : 0.0,
         initialScrollIndex:

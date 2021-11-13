@@ -60,7 +60,6 @@ class ReaderConstructor extends StatelessWidget {
           );
         }
 
-        // print(pagesVisited.elementAt(pagesVisited.length - 2));
         bookDataProvider.updateindexChapter(index);
         await db.updateLastChapterIndex(
           index,
@@ -81,11 +80,6 @@ class ReaderConstructor extends StatelessWidget {
           } else {
             isLastChapter = false;
           }
-          // return SizedBox(
-          //   child: ValueListenableBuilder<Widget>(
-          //       valueListenable: buildCount,
-          //       builder: (context, val, child) {
-          //         return val;
           if (val) {
             return ReaderChapter(
               index: itemIndex,
@@ -98,8 +92,6 @@ class ReaderConstructor extends StatelessWidget {
               child: Text(fileList.elementAt(itemIndex).Content ?? ""),
             );
           }
-          // }),
-          // );
         }
       },
       itemCount: fileList.length + 1,

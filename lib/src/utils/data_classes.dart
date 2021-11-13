@@ -1,5 +1,16 @@
 import 'package:epubx/epubx.dart';
 
+class DataWord {
+  final String toLang;
+  final String fromLang;
+  Function? changeListWord;
+  final String titleBook;
+  final String paragraph;
+
+  DataWord(this.toLang, this.fromLang, this.titleBook, this.paragraph,
+      {this.changeListWord});
+}
+
 class DBData {
   double? lastAlineo = 0.0;
   int? lastChapter = 0;
