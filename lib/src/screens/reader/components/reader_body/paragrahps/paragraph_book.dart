@@ -1,6 +1,9 @@
 import 'package:final_babel_reader_app/src/screens/reader/selection/material_selection.dart';
+import 'package:final_babel_reader_app/src/screens/reader/utils/card_definition_view.dart';
+import 'package:final_babel_reader_app/src/utils/page_route.dart';
 import 'package:final_babel_reader_app/src/utils/providers/book_data_provider.dart';
 import 'package:final_babel_reader_app/src/utils/providers/text_data_provider.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +20,20 @@ class HtmlPragragh extends StatefulWidget {
 
 class _HtmlPragraghState extends State<HtmlPragragh> {
   List<TextSpan> splitSentence = [];
+
+  tabSentence(String word) => TapGestureRecognizer()
+    ..onTap = () {
+      // beginW = begin;
+      // lastWord = word;
+      // endW = end;
+      Navigator.push(
+        context,
+        HeroPageView<CardTranslation>(
+          builder: (context) => CardTranslation(word: word),
+        ),
+      );
+    };
+
   @override
   void initState() {
     final dataT = Provider.of<TextData>(context, listen: false);
@@ -44,14 +61,14 @@ class _HtmlPragraghState extends State<HtmlPragragh> {
         // ? Sentence matching
         splitSentence.add(
           TextSpan(
-            text: widget.paragragh.substring(result.start, result.end),
-            style: const TextStyle(color: Colors.brown),
-            // recognizer: tabSentence(
-            //     paragragh,
-            //     paragragh.substring(result.start, result.end),
-            //     result.start,
-            //     result.end),
-          ),
+              text: widget.paragragh.substring(result.start, result.end),
+              style: const TextStyle(color: Colors.brown),
+              recognizer: tabSentence(
+                  widget.paragragh.substring(result.start, result.end))
+              //     paragragh.substring(result.start, result.end),
+              //     result.start,
+              //     result.end),
+              ),
         );
         // ? After all words of sentence matching
         offset = result.end;
@@ -85,20 +102,6 @@ class _HtmlPragraghState extends State<HtmlPragragh> {
     changeListWords(String newWord) {
       dataT.updateSelectedWords(newWord);
     }
-
-    // tabSentence(String sentence, word, int begin, int end) =>
-    //     TapGestureRecognizer()
-    //       ..onTap = () {
-    //         beginW = begin;
-    //         lastWord = word;
-    //         endW = end;
-    //         Navigator.push(
-    //           context,
-    //           HeroPageView<CardTranslation>(
-    //             builder: (context) => CardTranslation(word: word),
-    //           ),
-    //         );
-    //       };
 
     bool? isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
 

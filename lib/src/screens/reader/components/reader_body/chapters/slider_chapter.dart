@@ -24,6 +24,7 @@ class SliderChapter extends StatefulWidget {
 
 class _SliderChapterState extends State<SliderChapter> {
   int currentIndex = 0;
+  // TODO: ADD THE ITEMbuilder to the slider so it can be change without set state
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,6 @@ class _SliderChapterState extends State<SliderChapter> {
       () {
         dataScrolling.updateAlignment(
             widget.listener.itemPositions.value.first.itemLeadingEdge);
-
         if (widget.listener.itemPositions.value.first.index != currentIndex) {
           int lastIndex = widget.listener.itemPositions.value.first.index;
           dataScrolling.updateindexScroll(lastIndex);

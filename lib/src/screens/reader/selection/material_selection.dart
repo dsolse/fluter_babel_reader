@@ -53,21 +53,24 @@ class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
     final String wordSelected = delegate.textEditingValue.text.substring(
         delegate.textEditingValue.selection.start,
         delegate.textEditingValue.selection.end);
-
-    Navigator.of(context).push(
-      HeroPageView(
-        builder: (context) {
-          return CardAddWord(
-            word: wordSelected,
-            sentence: paragraph
-                .split(".")
-                .where((element) => element.contains(wordSelected))
-                .first,
-            changeSelectedWords: changeSelectedWords,
-          );
-        },
-      ),
-    );
+    if (!wordSelected.contains(" ")) {
+      Navigator.of(context).push(
+        HeroPageView(
+          builder: (context) {
+            return CardAddWord(
+              word: wordSelected,
+              sentence: paragraph
+                  .split(".")
+                  .where((element) => element.contains(wordSelected))
+                  .first,
+              changeSelectedWords: changeSelectedWords,
+            );
+          },
+        ),
+      );
+    } else {
+      print("one frase");
+    }
   }
 
   @override

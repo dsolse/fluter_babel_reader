@@ -51,7 +51,6 @@ class ReaderConstructor extends StatelessWidget {
     return PageView.builder(
       controller: controller.chaptersController,
       onPageChanged: (index) async {
-        
         if (fileList.length != index) {
           buildCount.value = ReaderChapter(
             index: controller.lastChapterindex,
@@ -87,12 +86,18 @@ class ReaderConstructor extends StatelessWidget {
           //       valueListenable: buildCount,
           //       builder: (context, val, child) {
           //         return val;
-          return ReaderChapter(
-            index: itemIndex,
-            controller: controller,
-            doc: fileList.elementAt(itemIndex),
-            isLastChapter: isLastChapter,
-          );
+          if (val) {
+            return ReaderChapter(
+              index: itemIndex,
+              controller: controller,
+              doc: fileList.elementAt(itemIndex),
+              isLastChapter: isLastChapter,
+            );
+          } else {
+            return SingleChildScrollView(
+              child: Text(fileList.elementAt(itemIndex).Content ?? ""),
+            );
+          }
           // }),
           // );
         }

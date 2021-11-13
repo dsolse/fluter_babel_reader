@@ -91,6 +91,7 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
   late EbookController controller;
   late List<dom.Element> listView;
   late Widget bodyReader;
+  bool valueS = true;
 
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghs = [];
@@ -120,6 +121,7 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
     listView = controller.fileList.map((e) {
       final elements =
           getElements(parse(e.Content).getElementsByTagName("title"));
+
       if (elements.isNotEmpty &&
           elements.first.text != controller.document.Title) {
         return elements.first;
@@ -133,25 +135,28 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
 
   @override
   Widget build(BuildContext context) {
-    bool valueS = true;
-
     return Scaffold(
       appBar: AppBar(
-        title: Consumer<BookData>(
-          builder: (context, value, _) {
-            final title = value.titleBook;
-            return Text(title);
-            // return AnimatedSwitcher(
-            //   duration: const Duration(milliseconds: 500),
-            //   transitionBuilder: (Widget child, Animation<double> animation) {
-            //     return ScaleTransition(child: child, scale: animation);
-            //   },
-            //   child: Text(
-            //     title,
-            //     key: ValueKey<String>(title),
-            //   ),
-            // );
-          },
+        title: Switch(
+          value: valueS,
+          onChanged: (val) => setState(() {
+            valueS = val;
+          }),
+          // title: Consumer<BookData>(
+          //   builder: (context, value, _) {
+          //     final title = value.titleBook;
+          //     return Text(title);
+          // return AnimatedSwitcher(
+          //   duration: const Duration(milliseconds: 500),
+          //   transitionBuilder: (Widget child, Animation<double> animation) {
+          //     return ScaleTransition(child: child, scale: animation);
+          //   },
+          //   child: Text(
+          //     title,
+          //     key: ValueKey<String>(title),
+          //   ),
+          // );
+          // },
         ),
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
