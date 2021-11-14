@@ -41,13 +41,6 @@ class ReaderConstructor extends StatelessWidget {
 
     final db = DBHelper();
 
-    buildCount.value = ReaderChapter(
-      index: controller.lastChapterindex,
-      controller: controller,
-      doc: fileList.elementAt(controller.lastChapterindex),
-      isLastChapter: false,
-    );
-
     return PageView.builder(
       controller: controller.chaptersController,
       onPageChanged: (index) async {
@@ -89,7 +82,8 @@ class ReaderConstructor extends StatelessWidget {
             );
           } else {
             return SingleChildScrollView(
-              child: Text(fileList.elementAt(itemIndex).Content ?? ""),
+              child:
+                  SelectableText(fileList.elementAt(itemIndex).Content ?? ""),
             );
           }
         }

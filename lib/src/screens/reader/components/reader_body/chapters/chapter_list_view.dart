@@ -1,7 +1,5 @@
 import 'dart:typed_data';
 import 'package:epubx/epubx.dart';
-import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/chapters/slider_chapter.dart';
-import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/paragrahps/paragraph_book.dart';
 import 'package:final_babel_reader_app/src/screens/reader/selection/material_selection.dart';
 import 'package:final_babel_reader_app/src/screens/reader/utils/card_definition_view.dart';
 import 'package:final_babel_reader_app/src/utils/ebook_controller.dart';
@@ -15,7 +13,6 @@ import 'package:flutter/src/widgets/image.dart' as image_import;
 import 'package:html/parser.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import "package:flutter_html/src/css_parser.dart" as css;
 
 class ReaderChapter extends StatefulWidget {
   const ReaderChapter({
@@ -40,7 +37,7 @@ class _ReaderChapterState extends State<ReaderChapter> {
     List<dom.Element> paragraghsB = [];
 
     for (final node in elements) {
-      if (node.getElementsByTagName("p").length > 2 &&
+      if (node.getElementsByTagName("p").length > 1 &&
           node.text.split(" ").length > 50) {
         paragraghsB.addAll(getElements(node.children));
       } else {
@@ -116,7 +113,10 @@ class _ReaderChapterState extends State<ReaderChapter> {
     final dataT = Provider.of<TextData>(context);
 
     styleCss["span"] = Style(color: Theme.of(context).colorScheme.primary);
-    styleCss["p"] = Style(color: dataT.textColorLM);
+    styleCss["p"] = Style(
+        color: (MediaQuery.of(context).platformBrightness != Brightness.dark)
+            ? dataT.textColorLM
+            : dataT.textColorDM);
     styleCss["div"] = Style(
       color: dataT.textColorLM,
     );
@@ -222,6 +222,11 @@ class _ReaderChapterState extends State<ReaderChapter> {
 
   @override
   Widget build(BuildContext context) {
+    final data = Provider.of<BookData>(context, listen: false);
+
+    final ItemPositionsListener itemPositionsListener =
+        ItemPositionsListener.create();
+
     widget.controller.chaptersController.addListener(() {
       if (mounted) {
         if ((widget.controller.chaptersController.page ?? 0.1) % 1 == 0) {
@@ -239,18 +244,24 @@ class _ReaderChapterState extends State<ReaderChapter> {
       }
     });
 
-    final ItemPositionsListener itemPositionsListener =
-        ItemPositionsListener.create();
+    int currentScroll = 0;
     final ItemScrollController scroll = ItemScrollController();
-    // itemPositionsListener.itemPositions.addListener(() {
-    //   print(itemPositionsListener.itemPositions.value);
-    // });
+    itemPositionsListener.itemPositions.addListener(() {
+      if (mounted) {
+        if (itemPositionsListener.itemPositions.value.isNotEmpty) {
+          data.updateAlignment(
+              itemPositionsListener.itemPositions.value.first.itemLeadingEdge);
+          if (itemPositionsListener.itemPositions.value.first.index !=
+              currentScroll) {
+            currentScroll =
+                itemPositionsListener.itemPositions.value.first.index;
+            data.updateindexScroll(
+                itemPositionsListener.itemPositions.value.first.index);
+          }
+        }
+      }
+    });
 
-    // return Column(
-    // children: [
-    // Expanded(
-    // flex: 40,
-    // child:
     return ScrollablePositionedList.separated(
         separatorBuilder: (context, index) => Divider(
             thickness: 5, color: Theme.of(context).colorScheme.background),
@@ -263,22 +274,5 @@ class _ReaderChapterState extends State<ReaderChapter> {
             settingTheElement(paragraghs.elementAt(index)) ?? const SizedBox(),
         itemPositionsListener: itemPositionsListener,
         itemScrollController: scroll);
-    // ),
-    // if (paragraghs.length > 1)
-    //   Expanded(
-    //     flex: 4,
-    //     child: SliderChapter(
-    //         min: 0,
-    //         controller: widget.controller,
-    //         max: (paragraghs.length - 1).toDouble(),
-    //         setValueScroll: (value) {
-    //           scroll.jumpTo(
-    //             index: value.toInt(),
-    //           );
-    //         },
-    //         listener: itemPositionsListener),
-    //   )
-    // ],
-    // );
   }
 }

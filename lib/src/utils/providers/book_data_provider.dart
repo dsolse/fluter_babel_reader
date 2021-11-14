@@ -67,6 +67,8 @@ class BookData with ChangeNotifier {
     final db = DBHelper();
     db.updateLastChapterScroll(indexScroll, titleBook, language);
     db.updateLastChapterAlineo(alignment, titleBook, language);
+    print(indexScroll);
+    print(alignment);
 
     super.dispose();
   }
