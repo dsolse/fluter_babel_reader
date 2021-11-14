@@ -57,12 +57,17 @@ class DrawerReader extends StatelessWidget {
 
     final data = Provider.of<TextData>(context, listen: false);
     final dataBook = Provider.of<BookData>(context, listen: false);
+
     void changeColor(Color color) {
       if (dark) {
         data.updateTextColorDM(color);
       } else {
         data.updateTextColorLM(color);
       }
+    }
+
+    void changeFontFamily(fontFamily) {
+      data.updateFontFamily(fontFamily);
     }
 
     void changeFontSize(double fontSize) {
@@ -79,7 +84,9 @@ class DrawerReader extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(HeroPageView(
-                    builder: (context) => FontColorMenu(
+                    builder: (context) => FontMenu(
+                          callbackFontFamily: changeFontFamily,
+                          currentFontFamily: data.fontFamily,
                           callbackColor: changeColor,
                           value: data.fontSize,
                           callbackFont: changeFontSize,

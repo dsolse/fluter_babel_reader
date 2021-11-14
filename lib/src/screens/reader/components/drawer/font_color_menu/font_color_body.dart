@@ -1,12 +1,15 @@
+import 'package:final_babel_reader_app/src/screens/reader/components/drawer/font_color_menu/drop_down_font.dart';
 import 'package:flutter/material.dart';
 
 import 'drop_down_translation.dart';
 import 'font_settings.dart';
 
-class FontColorMenu extends StatelessWidget {
-  const FontColorMenu(
+class FontMenu extends StatelessWidget {
+  const FontMenu(
       {Key? key,
       required this.callbackColor,
+      required this.currentFontFamily,
+      required this.callbackFontFamily,
       required this.callbackFont,
       required this.originalLanguage,
       required this.translationLanguage,
@@ -15,6 +18,8 @@ class FontColorMenu extends StatelessWidget {
       required this.value})
       : super(key: key);
 
+  final String currentFontFamily;
+  final Function callbackFontFamily;
   final Function callbackColor;
   final String originalLanguage;
   final Function changeTranslationLanguage;
@@ -43,6 +48,8 @@ class FontColorMenu extends StatelessWidget {
                     children: [
                       ColorChanger(callback: changeColor, color: Colors.white),
                       ColorChanger(
+                          callback: changeColor, color: Colors.white12),
+                      ColorChanger(
                           callback: changeColor, color: Colors.white24),
                       ColorChanger(
                           callback: changeColor, color: Colors.white38),
@@ -53,14 +60,21 @@ class FontColorMenu extends StatelessWidget {
                       ColorChanger(
                           callback: changeColor, color: Colors.black26),
                       ColorChanger(
-                          callback: changeColor, color: Colors.black45),
-                      ColorChanger(
-                          callback: changeColor, color: Colors.black87),
+                          callback: changeColor, color: Colors.black38),
                       ColorChanger(
                           callback: changeColor, color: Colors.black45),
                       ColorChanger(
+                          callback: changeColor, color: Colors.black54),
+                      ColorChanger(
                           callback: changeColor, color: Colors.black87),
+                      ColorChanger(callback: changeColor, color: Colors.black),
                     ],
+                  ),
+                  LimitedBox(
+                    child: ChangeFont(
+                      changeFontFamily: callbackFontFamily,
+                      fontFamily: currentFontFamily,
+                    ),
                   ),
                   LimitedBox(
                     child: FontSizeSlider(

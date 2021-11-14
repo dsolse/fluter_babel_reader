@@ -3,7 +3,9 @@ import 'package:epubx/epubx.dart';
 import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/chapters/slider_chapter.dart';
 import 'package:final_babel_reader_app/src/screens/reader/components/reader_body/paragrahps/paragraph_book.dart';
 import 'package:final_babel_reader_app/src/screens/reader/selection/material_selection.dart';
+import 'package:final_babel_reader_app/src/screens/reader/utils/card_definition_view.dart';
 import 'package:final_babel_reader_app/src/utils/ebook_controller.dart';
+import 'package:final_babel_reader_app/src/utils/page_route.dart';
 import 'package:final_babel_reader_app/src/utils/providers/book_data_provider.dart';
 import 'package:final_babel_reader_app/src/utils/providers/text_data_provider.dart';
 import 'package:flutter/material.dart';
@@ -93,15 +95,46 @@ class _ReaderChapterState extends State<ReaderChapter> {
     return dom.Element.html(splitSentence.join(""));
   }
 
+  void value(String? href, RenderContext rContext, Map<String, String> values,
+      dom.Element? element) {
+    if (href == "word-added") {
+      Navigator.push(
+          context,
+          HeroPageView<CardTranslation>(
+            builder: (context) => CardTranslation(
+              word: element?.text ?? "",
+            ),
+          ));
+    }
+  }
+
   Widget? settingTheElement(dom.Element elemento) {
     // ? Display images if exists
     late dom.Element element;
 
     final data = Provider.of<BookData>(context, listen: false);
     final dataT = Provider.of<TextData>(context);
-    List<String> wordsToMach = dataT.selectedWords;
 
-    RegExp match = RegExp(r"\b" + wordsToMach.join(r'\b|\b') + r"\b");
+    styleCss["span"] = Style(color: Theme.of(context).colorScheme.primary);
+    styleCss["p"] = Style(color: dataT.textColorLM);
+    styleCss["div"] = Style(
+      color: dataT.textColorLM,
+    );
+
+    styleCss["*"] =
+        Style(fontSize: FontSize(dataT.fontSize), fontFamily: dataT.fontFamily);
+
+    List<String> wordsToMach = dataT.selectedWords;
+    if (wordsToMach.isNotEmpty) {
+      RegExp match = RegExp(r"\b" + wordsToMach.join(r'\b|\b') + r"\b");
+      if (elemento.text.contains(match)) {
+        element = getElementIfContains(match, dataT.selectedWords, elemento);
+      } else {
+        element = elemento;
+      }
+    } else {
+      element = elemento;
+    }
 
     final controls = MyMaterialTextSelectionControls(
       changeTitle: (String word) => data.updateTitle(word),
@@ -109,18 +142,8 @@ class _ReaderChapterState extends State<ReaderChapter> {
       langFrom: data.language,
       langTo: data.toTranslate,
       tileBook: data.titleBook,
-      paragraph: elemento.text,
+      paragraph: elemento.text.replaceAll("\n", " "),
     );
-    if (elemento.text.contains(match)) {
-      element = getElementIfContains(match, dataT.selectedWords, elemento);
-    } else {
-      element = elemento;
-    }
-
-    value(href, rContext, values, element) {
-      print(href);
-      print(values);
-    }
 
     if (element.localName == "div") {
       if (element.getElementsByTagName("img").isNotEmpty) {

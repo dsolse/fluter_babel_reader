@@ -41,8 +41,30 @@ class CardTranslation extends StatelessWidget {
                               child: Text("There was an error"),
                             );
                           } else {
-                            return Text(
-                                (snapshot.data ?? "No data").toString());
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Center(
+                                    child: Text.rich(TextSpan(children: [
+                                      const TextSpan(
+                                          text: "Translation: ",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w300)),
+                                      TextSpan(
+                                          text: snapshot.data?["Translation"] ??
+                                              ""),
+                                    ])),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(snapshot.data?["Notes"] ?? ""),
+                                )
+                              ],
+                            );
+                            // return Text(
+                            //     (snapshot.data ?? "No data").toString());
                           }
                       }
                     })

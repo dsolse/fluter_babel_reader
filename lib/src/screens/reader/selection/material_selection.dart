@@ -54,11 +54,9 @@ class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
   void addWord(String selected, String translation, String note) async {
     final db = DBHelper();
     if (tileBook.isNotEmpty) {
-      changeSelectedWords(selected);
       print(selected);
-      print(translation);
-      print(note);
-      // db.addWord(selected, translation, note, tileBook, langFrom);
+      changeSelectedWords(selected);
+      db.addWord(selected, translation, note, tileBook, langFrom);
     } else {}
   }
 

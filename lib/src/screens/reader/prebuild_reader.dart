@@ -170,7 +170,10 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
           listFiles: listView,
         ),
       ),
-      body: ReaderConstructor(controller: controller, val: valueS),
+      body: Padding(
+        padding: const EdgeInsets.only(right: 8.0, left: 8.0),
+        child: ReaderConstructor(controller: controller, val: valueS),
+      ),
     );
   }
 }

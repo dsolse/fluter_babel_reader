@@ -6,12 +6,14 @@ class TextData with ChangeNotifier {
   late List<String> _selectedWords;
   late Color _textColorLM;
   late Color _textColorDM;
+  late String _fontFamily;
 
   TextData() {
     _selectedWords = [];
     _fontSize = 15.00;
     _textColorLM = Colors.black;
     _textColorDM = Colors.white;
+    _fontFamily = "Spectral";
     _initFonts();
   }
 
@@ -20,17 +22,24 @@ class TextData with ChangeNotifier {
     final lightFont = pref.getInt("fontColorLight");
     final darkFont = pref.getInt("fontColorDark");
     final size = pref.getDouble("fontSize");
+    final family = pref.getString("fontFamily");
     updateFontSize(size ?? 15.00);
+    updateFontFamily((family != null) ? family : "Spectral");
     updateTextColorDM((lightFont != null) ? Color(lightFont) : Colors.black);
     updateTextColorDM((darkFont != null) ? Color(darkFont) : Colors.white);
     notifyListeners();
   }
 
   List<String> get selectedWords => _selectedWords;
-
   Color get textColorLM => _textColorLM;
   Color get textColorDM => _textColorDM;
   double get fontSize => _fontSize;
+  String get fontFamily => _fontFamily;
+
+  updateFontFamily(String fontFamily) {
+    _fontFamily = fontFamily;
+    notifyListeners();
+  }
 
   updateTextColorLM(Color color) {
     _textColorLM = color;
@@ -66,11 +75,17 @@ class TextData with ChangeNotifier {
     pref.setDouble("fontSize", fontSize);
   }
 
+  _saveFontFamily() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString("fontFamily", fontFamily);
+  }
+
   @override
   void dispose() {
     _saveFontsColor(textColorLM.value, "fontColorLight");
     _saveFontsColor(textColorDM.value, "fontColorDark");
     _saveFontsSize();
+    _saveFontFamily();
 
     super.dispose();
   }

@@ -40,6 +40,7 @@ class ColorChanger extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
+      // radius: 10,
       child: InkWell(
         onTap: () {
           callback(color);
