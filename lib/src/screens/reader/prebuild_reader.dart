@@ -119,13 +119,27 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
         fileList: List.from(
             widget.data.ebook.Content?.Html?.values ?? const Iterable.empty()));
     listView = controller.fileList.map((e) {
-      final elements =
-          getElements(parse(e.Content).getElementsByTagName("title"));
-
-      if (elements.isNotEmpty &&
-          elements.first.text != controller.document.Title) {
-        return elements.first;
+      final elementsOfElement =
+          parse(e.Content?.replaceAll("<title/>", " ") ?? "");
+      final elementsTitle = elementsOfElement.getElementsByTagName("title");
+      final elementH1 = elementsOfElement.getElementsByTagName("h1");
+      final elementH2 = elementsOfElement.getElementsByTagName("h2");
+      final elementH3 = elementsOfElement.getElementsByTagName("h3");
+      final elementP = elementsOfElement.getElementsByTagName("p");
+      if (elementH1.isNotEmpty) {
+        return elementH1.first;
+      } else if (elementH2.isNotEmpty) {
+        return elementH2.first;
+      } else if (elementH3.isNotEmpty) {
+        return elementH3.first;
+      } else if (elementsTitle.isNotEmpty &&
+          elementsTitle.first.text != controller.document.Title &&
+          elementsTitle.first.text.length < 100) {
+        return elementsTitle.first;
       } else {
+        if (elementP.isNotEmpty && elementP.first.text.length < 50) {
+          return elementP.first;
+        }
         return dom.Element.html("<p>None</p>");
       }
     }).toList();

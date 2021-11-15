@@ -54,7 +54,6 @@ class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
   void addWord(String selected, String translation, String note) async {
     final db = DBHelper();
     if (tileBook.isNotEmpty) {
-      print(selected);
       changeSelectedWords(selected);
       db.addWord(selected, translation, note, tileBook, langFrom);
     } else {}
@@ -83,8 +82,6 @@ class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
           },
         ),
       );
-    } else {
-      print("one frase");
     }
   }
 

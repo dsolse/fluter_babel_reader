@@ -1,22 +1,34 @@
 import 'package:final_babel_reader_app/src/utils/data_classes.dart';
+import 'package:final_babel_reader_app/src/utils/page_route.dart';
 import 'package:flutter/material.dart';
 import 'package:translator/translator.dart';
 
-class CardAddWord extends StatelessWidget {
-  CardAddWord({
+import 'card_change_text.dart';
+
+class CardAddWord extends StatefulWidget {
+  const CardAddWord({
     Key? key,
     required this.dataWord,
     required this.word,
   }) : super(key: key);
   final String word;
   final DataWord dataWord;
+
+  @override
+  State<CardAddWord> createState() => _CardAddWordState();
+}
+
+class _CardAddWordState extends State<CardAddWord> {
   late String translation;
+  late String word;
+  @override
+  void initState() {
+    word = widget.word;
+    super.initState();
+  }
 
   Future<String> translate(String translate, String lang, String toLang) async {
     late String textResult;
-    print(toLang);
-    print(lang);
-
     try {
       var translator = GoogleTranslator();
 
@@ -53,13 +65,35 @@ class CardAddWord extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
-                    child: Text.rich(TextSpan(children: [
-                      const TextSpan(
-                        text: "Word: ",
-                        style: TextStyle(fontWeight: FontWeight.w900),
+                    child: ClipRect(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            HeroPageView(
+                              builder: (context) => CardChangeText(
+                                changeText: (String text) {
+                                  setState(() {
+                                    word = text;
+                                  });
+                                },
+                                text: widget.word,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(3.0),
+                          child: Text.rich(TextSpan(children: [
+                            const TextSpan(
+                              text: "Word: ",
+                              style: TextStyle(fontWeight: FontWeight.w900),
+                            ),
+                            TextSpan(text: word)
+                          ])),
+                        ),
                       ),
-                      TextSpan(text: word)
-                    ])),
+                    ),
                   ),
                 ),
                 Center(
@@ -67,7 +101,8 @@ class CardAddWord extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Center(
                     child: Center(
-                      child: Text(dataWord.paragraph.replaceAll("\n", " ")),
+                      child:
+                          Text(widget.dataWord.paragraph.replaceAll("\n", " ")),
                     ),
                   ),
                 )),
@@ -77,8 +112,8 @@ class CardAddWord extends StatelessWidget {
                     child: Center(
                       child: Center(
                         child: FutureBuilder<String>(
-                            future: translate(
-                                word, dataWord.fromLang, dataWord.toLang),
+                            future: translate(word, widget.dataWord.fromLang,
+                                widget.dataWord.toLang),
                             builder: (context, snapshot) {
                               switch (snapshot.connectionState) {
                                 case ConnectionState.waiting:
@@ -115,10 +150,10 @@ class CardAddWord extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          if (dataWord.changeListWord != null) {
+                          if (widget.dataWord.changeListWord != null) {
                             if (translation != "Check your conecction") {
-                              dataWord.changeListWord!(
-                                  word, translation, dataWord.paragraph);
+                              widget.dataWord.changeListWord!(widget.word,
+                                  translation, widget.dataWord.paragraph);
                             }
                           }
                         },

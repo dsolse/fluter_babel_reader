@@ -10,15 +10,13 @@ import 'package:provider/provider.dart';
 import 'chapter_list_view.dart';
 
 class ReaderConstructor extends StatelessWidget {
-  ReaderConstructor({
+  const ReaderConstructor({
     Key? key,
     required this.val,
     required this.controller,
   }) : super(key: key);
   final EbookController controller;
   final bool val;
-  final ValueNotifier<Widget> buildCount =
-      ValueNotifier<Widget>(const Text("Loading"));
 
   void loadWords(BuildContext context) async {
     final db = DBHelper();
@@ -44,15 +42,6 @@ class ReaderConstructor extends StatelessWidget {
     return PageView.builder(
       controller: controller.chaptersController,
       onPageChanged: (index) async {
-        if (fileList.length != index) {
-          buildCount.value = ReaderChapter(
-            index: controller.lastChapterindex,
-            controller: controller,
-            doc: fileList.elementAt(index),
-            isLastChapter: false,
-          );
-        }
-
         bookDataProvider.updateindexChapter(index);
         await db.updateLastChapterIndex(
           index,

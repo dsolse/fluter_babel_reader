@@ -33,12 +33,16 @@ class ReaderChapter extends StatefulWidget {
 }
 
 class _ReaderChapterState extends State<ReaderChapter> {
+  Map<String, Style> styleCss = {};
+
+  List<dom.Element> paragraghs = [];
+
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghsB = [];
 
     for (final node in elements) {
-      if (node.getElementsByTagName("p").length > 1 &&
-          node.text.split(" ").length > 50) {
+      if (node.getElementsByTagName("p").length > 2 &&
+          node.localName != "table") {
         paragraghsB.addAll(getElements(node.children));
       } else {
         paragraghsB.add(node);
@@ -47,8 +51,6 @@ class _ReaderChapterState extends State<ReaderChapter> {
 
     return paragraghsB;
   }
-
-  Map<String, Style> styleCss = {};
 
   dom.Element getElementIfContains(
       RegExp match, List<String> selectedWords, dom.Element paragraghElement) {
@@ -105,21 +107,21 @@ class _ReaderChapterState extends State<ReaderChapter> {
     }
   }
 
-  Widget? settingTheElement(dom.Element elemento) {
+  Widget settingTheElement(dom.Element elemento) {
     // ? Display images if exists
     late dom.Element element;
 
     final data = Provider.of<BookData>(context, listen: false);
     final dataT = Provider.of<TextData>(context);
 
-    styleCss["span"] = Style(color: Theme.of(context).colorScheme.primary);
-    styleCss["p"] = Style(
-        color: (MediaQuery.of(context).platformBrightness != Brightness.dark)
+    Color colorFont =
+        (MediaQuery.of(context).platformBrightness != Brightness.dark)
             ? dataT.textColorLM
-            : dataT.textColorDM);
-    styleCss["div"] = Style(
-      color: dataT.textColorLM,
-    );
+            : dataT.textColorDM;
+
+    styleCss["span"] = Style(color: Theme.of(context).colorScheme.primary);
+    styleCss["p"] = Style(color: colorFont);
+    styleCss["div"] = Style(color: colorFont);
 
     styleCss["*"] =
         Style(fontSize: FontSize(dataT.fontSize), fontFamily: dataT.fontFamily);
@@ -159,10 +161,21 @@ class _ReaderChapterState extends State<ReaderChapter> {
             },
           },
         );
-      } else if (element.getElementsByTagName("li").isNotEmpty) {
-        return SelectableHtml(data: element.outerHtml);
-      } else if (element.getElementsByTagName("ol").isNotEmpty) {
-        return SelectableHtml(data: element.outerHtml);
+      } else if (element.getElementsByTagName("li").isNotEmpty ||
+          element.getElementsByTagName("ol").isNotEmpty) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Html(
+            data: element.outerHtml,
+          ),
+        );
+      } else if (element.getElementsByTagName("table").isNotEmpty) {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Html(
+            data: element.outerHtml,
+          ),
+        );
       } else {
         // ? Display selectable text
         return SelectableHtml(
@@ -172,6 +185,14 @@ class _ReaderChapterState extends State<ReaderChapter> {
           onLinkTap: value,
         );
       }
+    } else if (element.getElementsByTagName("li").isNotEmpty ||
+        element.getElementsByTagName("ol").isNotEmpty) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Html(
+          data: element.outerHtml,
+        ),
+      );
     } else if (element.getElementsByTagName("table").isNotEmpty) {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -179,8 +200,8 @@ class _ReaderChapterState extends State<ReaderChapter> {
           data: element.outerHtml,
         ),
       );
-    } else if (element.localName == "image" ||
-        element.getElementsByTagName("image").isNotEmpty) {
+    } else if (element.localName == "img" ||
+        element.getElementsByTagName("img").isNotEmpty) {
       return Html(
         data: element.outerHtml,
         customRender: {
@@ -193,13 +214,6 @@ class _ReaderChapterState extends State<ReaderChapter> {
           },
         },
       );
-    } else if (element.getElementsByTagName("table").isNotEmpty) {
-      return SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Html(
-          data: element.outerHtml,
-        ),
-      );
     } else {
       return SelectableHtml(
         data: element.outerHtml,
@@ -210,12 +224,11 @@ class _ReaderChapterState extends State<ReaderChapter> {
     }
   }
 
-  List<dom.Element> paragraghs = [];
-
   @override
   void initState() {
-    dom.Element? contentBody = parse(widget.doc.Content).body;
-    paragraghs.addAll(getElements(contentBody!.children));
+    final contentBody =
+        parse(widget.doc.Content?.replaceAll("<title/>", " ") ?? "");
+    paragraghs.addAll(getElements(contentBody.body?.children ?? []));
 
     super.initState();
   }
@@ -263,15 +276,14 @@ class _ReaderChapterState extends State<ReaderChapter> {
     });
 
     return ScrollablePositionedList.separated(
-        separatorBuilder: (context, index) => Divider(
-            thickness: 5, color: Theme.of(context).colorScheme.background),
+        separatorBuilder: (context, index) => const SizedBox(height: 3),
         initialAlignment:
             widget.isLastChapter ? widget.controller.lastAlineo : 0.0,
         initialScrollIndex:
             widget.isLastChapter ? widget.controller.lastChapterScroll : 0,
         itemCount: paragraghs.length,
         itemBuilder: (context, index) =>
-            settingTheElement(paragraghs.elementAt(index)) ?? const SizedBox(),
+            settingTheElement(paragraghs.elementAt(index)),
         itemPositionsListener: itemPositionsListener,
         itemScrollController: scroll);
   }
