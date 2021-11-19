@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
+import 'package:final_babel_reader_app/src/screens/main_menu/utils/preview_book.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'book_tile.dart';
@@ -45,6 +46,12 @@ class _MainMenuState extends State<MainMenu> {
       final storageAccess = StorageAccess();
       final String? mapData = await storageAccess.writeEbook(bookFile);
       if (mapData != null) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => PreviewBook(
+                      bookLocation: json.decode(mapData)["locationBook"] ?? '',
+                    )));
         Map data = json.decode(mapData);
         setState(() {
           epubList.add(data);
@@ -60,22 +67,26 @@ class _MainMenuState extends State<MainMenu> {
         title: const Text("Library"),
       ),
       body: ListBooks(listBooks: epubList, callback: changeListBooks),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final FilePickerResult? result = await FilePicker.platform.pickFiles(
-              allowedExtensions: ["epub"],
-              type: FileType.custom,
-              dialogTitle: "Add an ebook",
-              onFileLoading: (status) {
-                return CircularProgressIndicator.adaptive(
-                  value: status.index.toDouble(),
-                );
-              });
-          if (result != null) {
-            addBook(result);
-          }
-        },
-        child: const Tooltip(child: Icon(Icons.add), message: "Add a new book"),
+      floatingActionButton: Tooltip(
+        message: "Add a new book",
+        child: FloatingActionButton(
+          onPressed: () async {
+            final FilePickerResult? result =
+                await FilePicker.platform.pickFiles(
+                    allowedExtensions: ["epub"],
+                    type: FileType.custom,
+                    dialogTitle: "Add an ebook",
+                    onFileLoading: (status) {
+                      return CircularProgressIndicator.adaptive(
+                        value: status.index.toDouble(),
+                      );
+                    });
+            if (result != null) {
+              addBook(result);
+            }
+          },
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

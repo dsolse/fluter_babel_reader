@@ -23,7 +23,7 @@ class ReaderChapter extends StatefulWidget {
     required this.isLastChapter,
   }) : super(key: key);
 
-  final EpubTextContentFile doc;
+  final String doc;
   final int index;
   final EbookController controller;
   final bool isLastChapter;
@@ -40,9 +40,19 @@ class _ReaderChapterState extends State<ReaderChapter> {
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghsB = [];
 
-    for (final node in elements) {
-      if (node.getElementsByTagName("p").length > 2 &&
-          node.localName != "table") {
+    for (final nodes in elements) {
+      late dom.Element node;
+      if (nodes.localName == "a") {
+        node = dom.Element.html("<div>${nodes.innerHtml}</div>");
+      } else {
+        node = nodes;
+      }
+      final paragraghsIn = node.getElementsByTagName("p");
+      final paraAchie =
+          paragraghsIn.where((p) => p.text.split(" ").length < 10);
+      final bool percentOfSpace =
+          (paraAchie.length / paragraghsIn.length) < 0.5;
+      if (paragraghsIn.length > 2 && percentOfSpace) {
         paragraghsB.addAll(getElements(node.children));
       } else {
         paragraghsB.add(node);
@@ -74,7 +84,7 @@ class _ReaderChapterState extends State<ReaderChapter> {
         }
         // ? Sentence matching
         splitSentence.add(
-          '<a href="word-added"><span>${paragragh.substring(result.start, result.end)}</span></a>',
+          '<a href="word-added"><span style = "color:blue; font-weight: bold;">${paragragh.substring(result.start, result.end)}</span></a>',
         );
         // ? After all words of sentence matching
         offset = result.end;
@@ -119,12 +129,25 @@ class _ReaderChapterState extends State<ReaderChapter> {
             ? dataT.textColorLM
             : dataT.textColorDM;
 
-    styleCss["span"] = Style(color: Theme.of(context).colorScheme.primary);
+    styleCss["a"] = Style(
+      color: colorFont,
+      textDecoration: TextDecoration.none,
+    );
     styleCss["p"] = Style(color: colorFont);
     styleCss["div"] = Style(color: colorFont);
+    styleCss["h1"] = Style(alignment: Alignment.center);
+    styleCss["h2"] = Style(alignment: Alignment.center);
 
-    styleCss["*"] =
-        Style(fontSize: FontSize(dataT.fontSize), fontFamily: dataT.fontFamily);
+    styleCss["td"] = Style(
+      padding: const EdgeInsets.all(4.00),
+      border: Border.all(width: 0.3, color: colorFont),
+    );
+
+    styleCss["*"] = Style(
+      textAlign: TextAlign.justify,
+      fontSize: FontSize(dataT.fontSize),
+      fontFamily: dataT.fontFamily,
+    );
 
     List<String> wordsToMach = dataT.selectedWords;
     if (wordsToMach.isNotEmpty) {
@@ -140,7 +163,9 @@ class _ReaderChapterState extends State<ReaderChapter> {
 
     final controls = MyMaterialTextSelectionControls(
       changeTitle: (String word) => data.updateTitle(word),
-      changeSelectedWords: (String word) => dataT.updateSelectedWords(word),
+      changeSelectedWords: (String word) {
+        dataT.updateSelectedWords(word);
+      },
       langFrom: data.language,
       langTo: data.toTranslate,
       tileBook: data.titleBook,
@@ -169,11 +194,13 @@ class _ReaderChapterState extends State<ReaderChapter> {
             data: element.outerHtml,
           ),
         );
-      } else if (element.getElementsByTagName("table").isNotEmpty) {
+      } else if (element.getElementsByTagName("table").isNotEmpty ||
+          element.localName == "table") {
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Html(
             data: element.outerHtml,
+            style: styleCss,
           ),
         );
       } else {
@@ -185,19 +212,24 @@ class _ReaderChapterState extends State<ReaderChapter> {
           onLinkTap: value,
         );
       }
-    } else if (element.getElementsByTagName("li").isNotEmpty ||
-        element.getElementsByTagName("ol").isNotEmpty) {
+    } else if (
+        // element.getElementsByTagName("li").isNotEmpty ||
+        // element.getElementsByTagName("ol").isNotEmpty ||
+        element.localName == "li" || element.localName == "ol") {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Html(
           data: element.outerHtml,
+          style: styleCss,
         ),
       );
-    } else if (element.getElementsByTagName("table").isNotEmpty) {
+    } else if (element.getElementsByTagName("table").isNotEmpty ||
+        element.localName == "table") {
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Html(
           data: element.outerHtml,
+          style: styleCss,
         ),
       );
     } else if (element.localName == "img" ||
@@ -226,8 +258,7 @@ class _ReaderChapterState extends State<ReaderChapter> {
 
   @override
   void initState() {
-    final contentBody =
-        parse(widget.doc.Content?.replaceAll("<title/>", " ") ?? "");
+    final contentBody = parse(widget.doc.replaceAll("<title/>", " "));
     paragraghs.addAll(getElements(contentBody.body?.children ?? []));
 
     super.initState();
@@ -276,13 +307,15 @@ class _ReaderChapterState extends State<ReaderChapter> {
     });
 
     return ScrollablePositionedList.separated(
-        separatorBuilder: (context, index) => const SizedBox(height: 3),
+        separatorBuilder: (context, index) => const SizedBox(),
+        // const SizedBox(height: 3),
         initialAlignment:
             widget.isLastChapter ? widget.controller.lastAlineo : 0.0,
         initialScrollIndex:
             widget.isLastChapter ? widget.controller.lastChapterScroll : 0,
         itemCount: paragraghs.length,
         itemBuilder: (context, index) =>
+            // Text(paragraghs.elementAt(index).outerHtml),
             settingTheElement(paragraghs.elementAt(index)),
         itemPositionsListener: itemPositionsListener,
         itemScrollController: scroll);

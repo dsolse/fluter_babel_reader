@@ -10,13 +10,15 @@ import 'package:provider/provider.dart';
 import 'chapter_list_view.dart';
 
 class ReaderConstructor extends StatelessWidget {
-  const ReaderConstructor({
+  ReaderConstructor({
     Key? key,
     required this.val,
     required this.controller,
   }) : super(key: key);
   final EbookController controller;
+
   final bool val;
+  final List<String> bookContent = [];
 
   void loadWords(BuildContext context) async {
     final db = DBHelper();
@@ -29,25 +31,61 @@ class ReaderConstructor extends StatelessWidget {
     }
   }
 
+  void getBook() async {
+    final List<String> spineListBooks = [];
+
+    final EpubBook book = controller.document;
+    if (book.Schema?.Package?.Spine?.Items != null) {
+      for (var n in book.Schema!.Package!.Spine!.Items!) {
+        if (n.IdRef != null) {
+          spineListBooks.add(n.IdRef!);
+        }
+      }
+
+      if (book.Schema?.Package?.Manifest?.Items != null) {
+        final List<String> bookContentRef = [];
+        for (var bRef in spineListBooks) {
+          String? bookReff = book.Schema?.Package?.Manifest?.Items
+              ?.where((element) => element.Id == bRef)
+              .first
+              .Href;
+          if (bookReff != null) {
+            bookContentRef.add(bookReff);
+          }
+        }
+        final Map<String, EpubTextContentFile>? mapBook = book.Content?.Html;
+        for (var bookRefFinal in bookContentRef) {
+          final boolMap = mapBook?[bookRefFinal]?.Content;
+          if (boolMap != null) {
+            bookContent.add(boolMap);
+          }
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    getBook();
     loadWords(context);
     final bookDataProvider = Provider.of<BookData>(context, listen: false);
 
     int num = 0;
-    List<EpubTextContentFile> fileList = controller.fileList;
+    List<String> fileList = controller.fileList;
 
     final db = DBHelper();
 
     return PageView.builder(
       controller: controller.chaptersController,
       onPageChanged: (index) async {
-        bookDataProvider.updateindexChapter(index);
-        await db.updateLastChapterIndex(
-          index,
-          bookDataProvider.titleBook,
-          bookDataProvider.language,
-        );
+        if (index != bookContent.length) {
+          bookDataProvider.updateindexChapter(index);
+          await db.updateLastChapterIndex(
+            index,
+            bookDataProvider.titleBook,
+            bookDataProvider.language,
+          );
+        }
       },
       itemBuilder: (BuildContext context, int itemIndex) {
         if (itemIndex == fileList.length) {
@@ -71,13 +109,14 @@ class ReaderConstructor extends StatelessWidget {
             );
           } else {
             return SingleChildScrollView(
-              child:
-                  SelectableText(fileList.elementAt(itemIndex).Content ?? ""),
+              child: SelectableText(
+                  // fileList.elementAt(itemIndex).Content
+                  bookContent[itemIndex]),
             );
           }
         }
       },
-      itemCount: fileList.length + 1,
+      itemCount: bookContent.length + 1,
     );
   }
 }

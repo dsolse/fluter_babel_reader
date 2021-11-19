@@ -7,7 +7,7 @@ class EbookController {
   final int lastChapterScroll;
   final int lastChapterindex;
   EpubBook document;
-  List<EpubTextContentFile> fileList;
+  List<String> fileList;
   EbookController(
       {required this.lastChapterScroll,
       required this.lastAlineo,

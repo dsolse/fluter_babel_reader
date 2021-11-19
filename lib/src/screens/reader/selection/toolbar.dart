@@ -5,6 +5,7 @@ class MyTextSelectionToolbar extends StatefulWidget {
   const MyTextSelectionToolbar({
     Key? key,
     required this.anchorAbove,
+    required this.goFunction,
     required this.anchorBelow,
     required this.addWord,
     required this.clipboardStatus,
@@ -15,6 +16,7 @@ class MyTextSelectionToolbar extends StatefulWidget {
     this.handleSelectAll,
   }) : super(key: key);
 
+  final Function goFunction;
   final Offset anchorAbove;
   final Offset anchorBelow;
   final VoidCallback addWord;
@@ -96,7 +98,7 @@ class MyTextSelectionToolbarState extends State<MyTextSelectionToolbar> {
         ),
       _TextSelectionToolbarItemData(
         onPressed: widget.translation,
-        label: 'Go to Glosbe',
+        label: 'Go to Reverso',
       ),
       if (widget.handleSelectAll != null)
         _TextSelectionToolbarItemData(

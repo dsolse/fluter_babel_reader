@@ -113,6 +113,11 @@ class MyMaterialTextSelectionControls extends CupertinoTextSelectionControls {
     );
 
     return MyTextSelectionToolbar(
+      goFunction: (String parameter) {
+        // if (parameter == "Reverso") {
+        //   Navigator.push(context, MaterialPageRoute(builder: (context) => ))
+        // } else if (parameter == "WikiDict") {}
+      },
       addWord: () => goToMenuAddWord(context, delegate),
       translation: () => translate(delegate, langFrom, langTo),
       anchorAbove: anchorAbove,

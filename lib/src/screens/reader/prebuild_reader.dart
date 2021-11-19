@@ -92,6 +92,40 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
   late List<dom.Element> listView;
   late Widget bodyReader;
   bool valueS = true;
+  final List<String> bookContent = [];
+
+  void getBook() async {
+    final List<String> spineListBooks = [];
+
+    final EpubBook book = controller.document;
+    if (book.Schema?.Package?.Spine?.Items != null) {
+      for (var n in book.Schema!.Package!.Spine!.Items!) {
+        if (n.IdRef != null) {
+          spineListBooks.add(n.IdRef!);
+        }
+      }
+
+      if (book.Schema?.Package?.Manifest?.Items != null) {
+        final List<String> bookContentRef = [];
+        for (var bRef in spineListBooks) {
+          String? bookReff = book.Schema?.Package?.Manifest?.Items
+              ?.where((element) => element.Id == bRef)
+              .first
+              .Href;
+          if (bookReff != null) {
+            bookContentRef.add(bookReff);
+          }
+        }
+        final Map<String, EpubTextContentFile>? mapBook = book.Content?.Html;
+        for (var bookRefFinal in bookContentRef) {
+          final boolMap = mapBook?[bookRefFinal]?.Content;
+          if (boolMap != null) {
+            bookContent.add(boolMap);
+          }
+        }
+      }
+    }
+  }
 
   List<dom.Element> getElements(List<dom.Element> elements) {
     List<dom.Element> paragraghs = [];
@@ -109,23 +143,28 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
 
   @override
   void initState() {
+    getBook();
+
     controller = EbookController(
-        lastAlineo: widget.data.position!.lastAlineo!,
-        lastChapterindex: widget.data.position!.lastChapter!,
-        lastChapterScroll: widget.data.position!.lastIndex!,
-        chaptersController:
-            PageController(initialPage: widget.data.position!.lastChapter!),
-        document: widget.data.ebook,
-        fileList: List.from(
-            widget.data.ebook.Content?.Html?.values ?? const Iterable.empty()));
+      lastAlineo: widget.data.position!.lastAlineo!,
+      lastChapterindex: widget.data.position!.lastChapter!,
+      lastChapterScroll: widget.data.position!.lastIndex!,
+      chaptersController:
+          PageController(initialPage: widget.data.position!.lastChapter!),
+      document: widget.data.ebook,
+      fileList: bookContent,
+      // List.from(
+      // widget.data.ebook.Content?.Html?.values ?? const Iterable.empty()),
+    );
+
     listView = controller.fileList.map((e) {
-      final elementsOfElement =
-          parse(e.Content?.replaceAll("<title/>", " ") ?? "");
+      final elementsOfElement = parse(e.replaceAll("<title/>", " "));
       final elementsTitle = elementsOfElement.getElementsByTagName("title");
       final elementH1 = elementsOfElement.getElementsByTagName("h1");
       final elementH2 = elementsOfElement.getElementsByTagName("h2");
       final elementH3 = elementsOfElement.getElementsByTagName("h3");
       final elementP = elementsOfElement.getElementsByTagName("p");
+
       if (elementH1.isNotEmpty) {
         return elementH1.first;
       } else if (elementH2.isNotEmpty) {
