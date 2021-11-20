@@ -56,7 +56,6 @@ class DrawerReader extends StatelessWidget {
     }
 
     final data = Provider.of<TextData>(context, listen: false);
-    final dataBook = Provider.of<BookData>(context, listen: false);
 
     void changeColor(Color color) {
       if (dark) {
@@ -83,22 +82,29 @@ class DrawerReader extends StatelessWidget {
             IconButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(HeroPageView(
+                // Navigator.of(context).push(
+                showDialog(
+                    context: context,
+                    barrierColor: Colors.black12,
                     builder: (context) => FontMenu(
                           callbackFontFamily: changeFontFamily,
                           currentFontFamily: data.fontFamily,
+                          currentColor:
+                              (dark) ? data.textColorDM : data.textColorLM,
                           callbackColor: changeColor,
                           value: data.fontSize,
                           callbackFont: changeFontSize,
-                          originalLanguage: dataBook.language,
-                          translationLanguage: dataBook.toTranslate,
+                          originalLanguage: data.language,
+                          translationLanguage: data.toTranslate,
                           changeOriginalLanguage: (String newLanguage) {
-                            dataBook.registerLanguage(newLanguage);
+                            data.registerLanguage(newLanguage);
                           },
                           changeTranslationLanguage: (newTranslation) {
-                            dataBook.registerToTranslate(newTranslation);
+                            data.registerToTranslate(newTranslation);
                           },
-                        )));
+                        )
+                    // )
+                    );
               },
               icon: const Icon(MdiIcons.formatFont),
             )
@@ -109,41 +115,21 @@ class DrawerReader extends StatelessWidget {
             ListView.builder(
               itemCount: booksTitles.length,
               itemBuilder: (context, index) {
-                return Row(
-                  children: [
-                    Expanded(
-                      flex: 2,
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          minHeight: 10.0,
-                          maxHeight: 60.0,
-                        ),
-                        margin: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 14,
-                      child: ListTile(
-                        leading: Text(
-                          "${index + 1}/${booksTitles.length}",
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary),
-                        ),
-                        title: Text(
-                          booksTitles.elementAt(index)["titleName"],
-                          style:
-                              TextStyle(color: Theme.of(context).primaryColor),
-                        ),
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          controller.scrollToChapter(
-                              booksTitles.elementAt(index)["titleInt"]);
-                        },
-                      ),
-                    )
-                  ],
+                return ListTile(
+                  leading: Text(
+                    "${index + 1}/${booksTitles.length}",
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.primary),
+                  ),
+                  title: Text(
+                    booksTitles.elementAt(index)["titleName"],
+                    style: TextStyle(color: Theme.of(context).primaryColor),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    controller.scrollToChapter(
+                        booksTitles.elementAt(index)["titleInt"]);
+                  },
                 );
               },
             ),

@@ -107,13 +107,12 @@ class _ReaderChapterState extends State<ReaderChapter> {
   void value(String? href, RenderContext rContext, Map<String, String> values,
       dom.Element? element) {
     if (href == "word-added") {
-      Navigator.push(
-          context,
-          HeroPageView<CardTranslation>(
-            builder: (context) => CardTranslation(
-              word: element?.text ?? "",
-            ),
-          ));
+      showDialog<CardTranslation>(
+        context: context,
+        builder: (context) => CardTranslation(
+          word: element?.text ?? "",
+        ),
+      );
     }
   }
 
@@ -166,8 +165,8 @@ class _ReaderChapterState extends State<ReaderChapter> {
       changeSelectedWords: (String word) {
         dataT.updateSelectedWords(word);
       },
-      langFrom: data.language,
-      langTo: data.toTranslate,
+      langFrom: dataT.language,
+      langTo: dataT.toTranslate,
       tileBook: data.titleBook,
       paragraph: elemento.text.replaceAll("\n", " "),
     );
@@ -186,13 +185,20 @@ class _ReaderChapterState extends State<ReaderChapter> {
             },
           },
         );
-      } else if (element.getElementsByTagName("li").isNotEmpty ||
+      } else if (element.localName == "li" ||
+          element.localName == "ol" ||
+          element.getElementsByTagName("li").isNotEmpty ||
           element.getElementsByTagName("ol").isNotEmpty) {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Html(
-            data: element.outerHtml,
-          ),
+        return Html(
+          data: element.outerHtml,
+          style: styleCss,
+          customRender: {
+            "p": (contextR, child) {
+              return SelectableHtml(
+                  style: styleCss,
+                  data: contextR.tree.element?.outerHtml ?? '');
+            }
+          },
         );
       } else if (element.getElementsByTagName("table").isNotEmpty ||
           element.localName == "table") {
@@ -308,14 +314,12 @@ class _ReaderChapterState extends State<ReaderChapter> {
 
     return ScrollablePositionedList.separated(
         separatorBuilder: (context, index) => const SizedBox(),
-        // const SizedBox(height: 3),
         initialAlignment:
             widget.isLastChapter ? widget.controller.lastAlineo : 0.0,
         initialScrollIndex:
             widget.isLastChapter ? widget.controller.lastChapterScroll : 0,
         itemCount: paragraghs.length,
         itemBuilder: (context, index) =>
-            // Text(paragraghs.elementAt(index).outerHtml),
             settingTheElement(paragraghs.elementAt(index)),
         itemPositionsListener: itemPositionsListener,
         itemScrollController: scroll);

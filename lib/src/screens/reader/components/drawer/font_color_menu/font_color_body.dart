@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'drop_down_translation.dart';
 import 'font_settings.dart';
 
-class FontMenu extends StatelessWidget {
+class FontMenu extends StatefulWidget {
   const FontMenu(
       {Key? key,
       required this.callbackColor,
+      required this.currentColor,
       required this.currentFontFamily,
       required this.callbackFontFamily,
       required this.callbackFont,
@@ -19,6 +20,7 @@ class FontMenu extends StatelessWidget {
       : super(key: key);
 
   final String currentFontFamily;
+  final Color currentColor;
   final Function callbackFontFamily;
   final Function callbackColor;
   final String originalLanguage;
@@ -28,8 +30,44 @@ class FontMenu extends StatelessWidget {
   final double value;
   final Function callbackFont;
 
-  changeColor(Color color) => callbackColor(color);
-  changeFontSize(double valueSize) => callbackFont(valueSize);
+  @override
+  State<FontMenu> createState() => _FontMenuState();
+}
+
+class _FontMenuState extends State<FontMenu> {
+  late Color _color;
+  late String _fontFamily;
+  late double _fontSize;
+  @override
+  void initState() {
+    super.initState();
+    _color = widget.currentColor;
+    _fontFamily = widget.currentFontFamily;
+    _fontSize = widget.value;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  changeColor(Color color) {
+    setState(() {
+      _color = color;
+    });
+  }
+
+  changeFontFamily(String family) {
+    setState(() {
+      _fontFamily = family;
+    });
+  }
+
+  changeFontSize(double valueSize) {
+    setState(() {
+      _fontSize = valueSize;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +80,13 @@ class FontMenu extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Text(
+                    "Lorem ipsum sit amet,\nconsectetur adipiscing elit",
+                    style: TextStyle(
+                        color: _color,
+                        fontSize: _fontSize,
+                        fontFamily: _fontFamily),
+                  ),
                   Wrap(
                     spacing: 15.00,
                     runSpacing: 15.00,
@@ -72,23 +117,32 @@ class FontMenu extends StatelessWidget {
                   ),
                   LimitedBox(
                     child: ChangeFont(
-                      changeFontFamily: callbackFontFamily,
-                      fontFamily: currentFontFamily,
+                      changeFontFamily: changeFontFamily,
+                      fontFamily: widget.currentFontFamily,
                     ),
                   ),
                   LimitedBox(
                     child: FontSizeSlider(
                       callback: changeFontSize,
-                      value: value,
+                      value: widget.value,
                     ),
                   ),
                   SizedBox(
                     child: SelectTranslation(
-                        originalLanguage: originalLanguage,
-                        translationLanguage: translationLanguage,
-                        changeOriginalLanguage: changeOriginalLanguage,
-                        changeTranslationLanguage: changeTranslationLanguage),
-                  )
+                        originalLanguage: widget.originalLanguage,
+                        translationLanguage: widget.translationLanguage,
+                        changeOriginalLanguage: widget.changeOriginalLanguage,
+                        changeTranslationLanguage:
+                            widget.changeTranslationLanguage),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        widget.callbackColor(_color);
+                        widget.callbackFont(_fontSize);
+                        widget.callbackFontFamily(_fontFamily);
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Save settings"))
                 ],
               ),
             ),

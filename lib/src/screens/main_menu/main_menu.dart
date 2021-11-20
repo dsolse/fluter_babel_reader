@@ -46,12 +46,12 @@ class _MainMenuState extends State<MainMenu> {
       final storageAccess = StorageAccess();
       final String? mapData = await storageAccess.writeEbook(bookFile);
       if (mapData != null) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => PreviewBook(
-                      bookLocation: json.decode(mapData)["locationBook"] ?? '',
-                    )));
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => PreviewBook(
+        //               bookLocation: json.decode(mapData)["locationBook"] ?? '',
+        //             )));
         Map data = json.decode(mapData);
         setState(() {
           epubList.add(data);

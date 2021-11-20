@@ -31,12 +31,18 @@ class DBData {
 class EbookData {
   late EpubBook ebook;
   DBData? position;
+  late List<String> contentBook;
 
-  EbookData({required this.position, required this.ebook});
+  EbookData({
+    required this.position,
+    required this.ebook,
+    required this.contentBook,
+  });
 
   EbookData.fromJson(Map<dynamic, dynamic> map) {
     ebook = map["ebook"];
     position = map["position"];
+    contentBook = map['contentBook'];
   }
 }
 

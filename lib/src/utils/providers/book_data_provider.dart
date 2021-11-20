@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 class BookData with ChangeNotifier {
   late String _title;
   late String _language;
-  late String _toTranslate;
   late String _bookTitle;
   late double _alignment;
   late int _indexChapter;
@@ -13,7 +12,6 @@ class BookData with ChangeNotifier {
   BookData() {
     _title = "CoverData";
     _language = "en";
-    _toTranslate = "en";
     _bookTitle = "";
     _alignment = 0.0;
     _indexChapter = 0;
@@ -25,21 +23,14 @@ class BookData with ChangeNotifier {
   int get indexScroll => _indexScroll;
   String get titleBook => _bookTitle;
   String get language => _language;
-  String get toTranslate => _toTranslate;
 
   registerTitle(String titleBook) {
     _bookTitle = titleBook;
     notifyListeners();
   }
 
-  registerToTranslate(String lang) {
-    _toTranslate = lang;
-    notifyListeners();
-  }
-
   registerLanguage(String lang) {
     _language = lang;
-    notifyListeners();
   }
 
   updateTitle(String newTitle) {

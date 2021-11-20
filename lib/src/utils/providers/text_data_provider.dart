@@ -7,9 +7,13 @@ class TextData with ChangeNotifier {
   late Color _textColorLM;
   late Color _textColorDM;
   late String _fontFamily;
+  late String _language;
+  late String _toTranslate;
 
   TextData() {
     _selectedWords = [];
+    _language = "en";
+    _toTranslate = "en";
     _fontSize = 15.00;
     _textColorLM = Colors.black;
     _textColorDM = Colors.white;
@@ -35,6 +39,18 @@ class TextData with ChangeNotifier {
   Color get textColorDM => _textColorDM;
   double get fontSize => _fontSize;
   String get fontFamily => _fontFamily;
+  String get language => _language;
+  String get toTranslate => _toTranslate;
+
+  registerToTranslate(String lang) {
+    _toTranslate = lang;
+    notifyListeners();
+  }
+
+  registerLanguage(String lang) {
+    _language = lang;
+    notifyListeners();
+  }
 
   updateFontFamily(String fontFamily) {
     _fontFamily = fontFamily;

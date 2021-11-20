@@ -7,14 +7,14 @@ class EbookController {
   final int lastChapterScroll;
   final int lastChapterindex;
   EpubBook document;
-  List<String> fileList;
-  EbookController(
-      {required this.lastChapterScroll,
-      required this.lastAlineo,
-      required this.lastChapterindex,
-      required this.document,
-      required this.chaptersController,
-      required this.fileList});
+
+  EbookController({
+    required this.lastChapterScroll,
+    required this.lastAlineo,
+    required this.lastChapterindex,
+    required this.document,
+    required this.chaptersController,
+  });
   get chapterController => chaptersController;
 
   scrollToChapter(int index) {
