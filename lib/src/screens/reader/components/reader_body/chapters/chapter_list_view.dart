@@ -1,9 +1,7 @@
 import 'dart:typed_data';
-import 'package:epubx/epubx.dart';
 import 'package:final_babel_reader_app/src/screens/reader/selection/material_selection.dart';
 import 'package:final_babel_reader_app/src/screens/reader/utils/card_definition_view.dart';
 import 'package:final_babel_reader_app/src/utils/ebook_controller.dart';
-import 'package:final_babel_reader_app/src/utils/page_route.dart';
 import 'package:final_babel_reader_app/src/utils/providers/book_data_provider.dart';
 import 'package:final_babel_reader_app/src/utils/providers/text_data_provider.dart';
 import 'package:flutter/material.dart';

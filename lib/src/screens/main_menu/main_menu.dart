@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'package:epubx/epubx.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:final_babel_reader_app/src/screens/main_menu/utils/preview_book.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'book_tile.dart';
+import 'utils/preview_book.dart';
 import 'utils/storage.dart';
 
 class MainMenu extends StatefulWidget {
@@ -40,23 +41,74 @@ class _MainMenuState extends State<MainMenu> {
   }
 
   addBook(FilePickerResult? file) async {
+    String language = "";
+    String title = "";
+    String author = "";
+
     List<PlatformFile>? newBook = file?.files;
     PlatformFile? bookFile = newBook?.first;
     if (bookFile != null) {
       final storageAccess = StorageAccess();
-      final String? mapData = await storageAccess.writeEbook(bookFile);
-      if (mapData != null) {
-        // Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //         builder: (context) => PreviewBook(
-        //               bookLocation: json.decode(mapData)["locationBook"] ?? '',
-        //             )));
-        Map data = json.decode(mapData);
-        setState(() {
-          epubList.add(data);
-        });
-      }
+      EpubBookRef? epub;
+
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => AlertDialog(
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                // print(title);
+                // print(author);
+                // print(language);
+                if (epub != null) {
+                  final mapData = await storageAccess.writeEbook(
+                      bookFile, epub!, language, title, author);
+                  if (mapData != null) {
+                    Map data = json.decode(mapData);
+                    setState(() {
+                      epubList.add(data);
+                    });
+                  }
+                }
+                Navigator.pop(context);
+              },
+              child: const Text("Save"),
+            ),
+          ],
+          title: const Text("Check all the information"),
+          content: FutureBuilder<EpubBookRef>(
+              future: storageAccess.getBookRef(bookFile),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError || snapshot.data == null) {
+                    return Text(snapshot.error.toString());
+                  } else {
+                    epub = snapshot.data;
+                    return PrevieBook(
+                      coverImage: snapshot.data!.readCover(),
+                      ebook: snapshot.data!,
+                      changeAuthor: (String value) {
+                        author = value;
+                      },
+                      changeLanguage: (String value) {
+                        language = value;
+                      },
+                      changeTitle: (String value) {
+                        title = value;
+                      },
+                    );
+                  }
+                } else {
+                  return const CircularProgressIndicator();
+                }
+              }),
+        ),
+      );
     }
   }
 

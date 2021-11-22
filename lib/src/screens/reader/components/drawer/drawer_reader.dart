@@ -1,6 +1,5 @@
 import 'package:final_babel_reader_app/src/utils/db_helper.dart';
 import 'package:final_babel_reader_app/src/utils/ebook_controller.dart';
-import 'package:final_babel_reader_app/src/utils/page_route.dart';
 import 'package:final_babel_reader_app/src/utils/providers/book_data_provider.dart';
 import 'package:final_babel_reader_app/src/utils/providers/text_data_provider.dart';
 import 'package:flutter/material.dart';

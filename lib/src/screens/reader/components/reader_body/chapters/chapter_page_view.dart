@@ -1,4 +1,3 @@
-import 'package:epubx/epubx.dart';
 import 'package:final_babel_reader_app/src/utils/db_helper.dart';
 import 'package:final_babel_reader_app/src/utils/ebook_controller.dart';
 import 'package:final_babel_reader_app/src/utils/providers/book_data_provider.dart';

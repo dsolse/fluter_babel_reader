@@ -1,4 +1,5 @@
 import 'package:epubx/epubx.dart';
+import 'package:html/dom.dart' as dom;
 
 class DataWord {
   final String toLang;
@@ -32,8 +33,10 @@ class EbookData {
   late EpubBook ebook;
   DBData? position;
   late List<String> contentBook;
+  late List<dom.Element> contentMenu;
 
   EbookData({
+    required this.contentMenu,
     required this.position,
     required this.ebook,
     required this.contentBook,
@@ -43,6 +46,7 @@ class EbookData {
     ebook = map["ebook"];
     position = map["position"];
     contentBook = map['contentBook'];
+    contentMenu = map['contentMenu'];
   }
 }
 

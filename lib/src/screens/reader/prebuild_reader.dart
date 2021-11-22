@@ -63,22 +63,81 @@ class EbookReaderFuture extends StatelessWidget {
     return bookContent;
   }
 
+  List<dom.Element> getContentMenu(List<String> content) {
+    final List<dom.Element> listView = content.map((e) {
+      final elementsOfElement = parse(e.replaceAll("<title/>", " "));
+      try {
+        final elementH1 = elementsOfElement.getElementsByTagName("h1");
+
+        if (elementH1.isNotEmpty) {
+          return elementH1
+              .where((element) => RegExp("[a-z]").hasMatch(element.text))
+              .first;
+        } else {
+          final elementH2 = elementsOfElement.getElementsByTagName("h2");
+          if (elementH2.isNotEmpty) {
+            return elementH2
+                .where((element) => RegExp("[a-z]").hasMatch(element.text))
+                .first;
+          } else {
+            final elementH3 = elementsOfElement.getElementsByTagName("h3");
+            if (elementH3.isNotEmpty) {
+              return elementH3
+                  .where((element) => RegExp("[a-z]").hasMatch(element.text))
+                  .first;
+            } else {
+              final elementsTitle =
+                  elementsOfElement.getElementsByTagName("title");
+              if (elementsTitle.isNotEmpty &&
+                  elementsTitle.first.text.length < 100) {
+                return elementsTitle
+                    .where((element) => RegExp("[a-z]").hasMatch(element.text))
+                    .first;
+              } else {
+                final elementP = elementsOfElement
+                    .getElementsByTagName("p")
+                    .where((element) => RegExp("[a-z]").hasMatch(element.text));
+                if (elementP.isNotEmpty && elementP.first.text.length < 50) {
+                  return elementP.first;
+                } else {
+                  return dom.Element.html("<p>None</p>");
+                }
+              }
+            }
+          }
+        }
+      } catch (er) {
+        return dom.Element.html("<p>None</p>");
+      }
+    }).toList();
+    return listView;
+  }
+
   Future<EbookData> getEbook(BuildContext context) async {
     final db = DBHelper();
 
     final EpubBook book =
         await EpubReader.readBook(File(epubBook.locationBook!).readAsBytes());
 
+    final List<String> contentBook = getBook(book);
+
+    final List<dom.Element> contentMenu = getContentMenu(contentBook);
+
     final position =
         await addBook(epubBook.title ?? "None", epubBook.language ?? "en", db);
     final providerData = Provider.of<BookData>(context, listen: false);
     final providerDataT = Provider.of<TextData>(context, listen: false);
+
     providerData.registerLanguage(epubBook.language ?? "en");
     providerDataT.registerLanguage(epubBook.language ?? "en");
     providerData.registerTitle(epubBook.title ?? "Untitle");
     providerDataT.registerToTranslate("en");
-    final result = EbookData.fromJson(
-        {"ebook": book, "position": position, "contentBook": getBook(book)});
+    final result = EbookData.fromJson({
+      "ebook": book,
+      "position": position,
+      "contentBook": contentBook,
+      "contentMenu": contentMenu,
+    });
 
     return result;
   }
@@ -121,8 +180,6 @@ class EbookReaderScafold extends StatefulWidget {
 
 class _EbookReaderScafoldState extends State<EbookReaderScafold> {
   late EbookController controller;
-  late List<dom.Element> listView;
-  late Widget bodyReader;
   bool valueS = true;
 
   List<dom.Element> getElements(List<dom.Element> elements) {
@@ -149,66 +206,12 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
           PageController(initialPage: widget.data.position!.lastChapter!),
       document: widget.data.ebook,
     );
-    listView = widget.data.contentBook.map((e) {
-      final elementsOfElement = parse(e.replaceAll("<title/>", " "));
-      final elementsTitle = elementsOfElement.getElementsByTagName("title");
-      final elementH1 = elementsOfElement.getElementsByTagName("h1");
-      final elementH2 = elementsOfElement.getElementsByTagName("h2");
-      final elementH3 = elementsOfElement.getElementsByTagName("h3");
-      final elementP = elementsOfElement.getElementsByTagName("p");
-
-      if (elementH1.isNotEmpty) {
-        return elementH1.first;
-      } else if (elementH2.isNotEmpty) {
-        return elementH2.first;
-      } else if (elementH3.isNotEmpty) {
-        return elementH3.first;
-      } else if (elementsTitle.isNotEmpty &&
-          elementsTitle.first.text.length < 100) {
-        return elementsTitle.first;
-      } else {
-        if (elementP.isNotEmpty && elementP.first.text.length < 50) {
-          return elementP.first;
-        }
-        return dom.Element.html("<p>None</p>");
-      }
-    }).toList();
-
-    // listView = (List.from(
-    //         widget.data.ebook.Content?.Html?.values ?? const Iterable.empty()))
-    //     .map((e) {
-    //   final elementsOfElement =
-    //       parse(e.Content?.replaceAll("<title/>", " ") ?? "");
-    //   final elementsTitle = elementsOfElement.getElementsByTagName("title");
-    //   final elementH1 = elementsOfElement.getElementsByTagName("h1");
-    //   final elementH2 = elementsOfElement.getElementsByTagName("h2");
-    //   final elementH3 = elementsOfElement.getElementsByTagName("h3");
-    //   final elementP = elementsOfElement.getElementsByTagName("p");
-
-    //   if (elementH1.isNotEmpty) {
-    //     return elementH1.first;
-    //   } else if (elementH2.isNotEmpty) {
-    //     return elementH2.first;
-    //   } else if (elementH3.isNotEmpty) {
-    //     return elementH3.first;
-    //   } else if (elementsTitle.isNotEmpty &&
-    //       elementsTitle.first.text != controller.document.Title &&
-    //       elementsTitle.first.text.length < 100) {
-    //     return elementsTitle.first;
-    //   } else {
-    //     if (elementP.isNotEmpty && elementP.first.text.length < 50) {
-    //       return elementP.first;
-    //     }
-    //     return dom.Element.html("<p>None</p>");
-    //   }
-    // }).toList();
-
     super.initState();
   }
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.restoreSystemUIOverlays();
     super.dispose();
   }
 
@@ -217,76 +220,100 @@ class _EbookReaderScafoldState extends State<EbookReaderScafold> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    final _color = Colors.white;
 
     return Scaffold(
       key: _keyScafold,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Switch(
-          value: valueS,
-          onChanged: (val) => setState(() {
-            valueS = val;
-          }),
-        ),
-        automaticallyImplyLeading: false,
-        leading: Container(
-          decoration: BoxDecoration(
-              borderRadius: const BorderRadius.only(
-                bottomRight: Radius.elliptical(10, 10),
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                      Theme.of(context).colorScheme.background.withOpacity(0.5),
-                  blurRadius: 1.0,
-                ),
-              ]),
-          child: InkWell(
-            splashColor: Theme.of(context).colorScheme.background,
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back),
-          ),
-        ),
-        actions: [
-          Container(
-            width: 56.0,
-            decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.elliptical(10, 10),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .background
-                        .withOpacity(0.5),
-                    blurRadius: 1.0,
-                  ),
-                ]),
-            child: InkWell(
-              splashColor: Theme.of(context).colorScheme.background,
-              onTap: () => _keyScafold.currentState!.openEndDrawer(),
-              child: const Icon(Icons.menu),
-            ),
-          ),
-        ],
-      ),
+      resizeToAvoidBottomInset: false,
+
+      //   title: Switch(
+      //     value: valueS,
+      //     onChanged: (val) => setState(() {
+      //       valueS = val;
+      //     }),
+      //   ),
       endDrawer: Drawer(
         child: DrawerReader(
           dark: MediaQuery.of(context).platformBrightness == Brightness.dark,
           controller: controller,
-          listFiles: listView,
+          listFiles: widget.data.contentMenu,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(15.00),
-        child: ReaderConstructor(
-          controller: controller,
-          val: valueS,
-          bookContent: widget.data.contentBook,
-        ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(15.00),
+            child: ReaderConstructor(
+              controller: controller,
+              val: valueS,
+              bookContent: widget.data.contentBook,
+            ),
+          ),
+          Positioned(
+            top: 0.0,
+            right: 0.0,
+            child: Tooltip(
+              message: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              child: Container(
+                width: 56.0,
+                height: 56.0,
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.elliptical(10, 10),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(0.5),
+                        blurRadius: 1.0,
+                      ),
+                    ]),
+                child: InkWell(
+                  splashColor: Theme.of(context).colorScheme.background,
+                  onTap: () => _keyScafold.currentState!.openEndDrawer(),
+                  child: Icon(
+                    Icons.menu,
+                    color: _color,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0.0,
+            left: 0.0,
+            child: Tooltip(
+              message: MaterialLocalizations.of(context).backButtonTooltip,
+              child: Container(
+                width: 56.0,
+                height: 56.0,
+                decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      bottomRight: Radius.elliptical(10, 10),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .background
+                            .withOpacity(0.5),
+                        blurRadius: 1.0,
+                      ),
+                    ]),
+                child: InkWell(
+                  splashColor: Theme.of(context).colorScheme.background,
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: _color,
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

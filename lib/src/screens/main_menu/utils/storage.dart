@@ -70,8 +70,16 @@ class StorageAccess {
     return mapString;
   }
 
-  Future<String?> writeEbook(PlatformFile fileBook) async {
+  Future<EpubBookRef> getBookRef(PlatformFile fileBook) async {
+    final epubBook =
+        await EpubReader.openBook(File(fileBook.path!).readAsBytesSync());
+    return epubBook;
+  }
+
+  Future<String?> writeEbook(PlatformFile fileBook, EpubBookRef epubBook,
+      String language, String title, String author) async {
     final String? storageLocation = await _storagePath;
+
     if (storageLocation != null) {
       final directory =
           Directory(storageLocation.split("/Android/").first + "/Babel");
@@ -83,8 +91,7 @@ class StorageAccess {
       if (!await ebooksDirectory.exists()) {
         ebooksDirectory.create();
       }
-      final epubBook =
-          await EpubReader.openBook(File(fileBook.path!).readAsBytesSync());
+
       final fileEbook = File(ebooksPath + "/" + fileBook.name);
       if (!await fileEbook.exists()) {
         if (fileBook.path != null) {
@@ -92,20 +99,11 @@ class StorageAccess {
         }
       }
 
-      final pathImage = await _writeImage(
-          await epubBook.readCover(), (fileBook.name).replaceAll(" / ", "-"));
-      late List<String> lang;
-      if (epubBook.Schema?.Package?.Metadata?.Languages != null) {
-        lang = epubBook.Schema?.Package?.Metadata?.Languages ?? ["None"];
-      } else {
-        lang = ["None"];
-      }
-      final mapData = _getMapString(
-          fileEbook.path,
-          pathImage,
-          ((lang.isNotEmpty) ? lang.first : "None").toString(),
-          epubBook.Author,
-          epubBook.Title);
+      final pathImage = await _writeImage(await epubBook.readCover(),
+          (fileBook.name).replaceAll(" / ", "-").replaceAll('/', "-"));
+
+      final mapData = await _getMapString(
+          fileEbook.path, pathImage, language, author, author);
       return mapData;
     }
   }

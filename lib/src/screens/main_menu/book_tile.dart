@@ -18,7 +18,7 @@ class ListBooks extends StatelessWidget {
     List<Widget> chips = [];
     final RoundedRectangleBorder _shape =
         RoundedRectangleBorder(borderRadius: BorderRadius.circular(9.0));
-    final Color fontColor = Colors.white;
+    const Color fontColor = Colors.white;
     final Color chipColor = Theme.of(context).colorScheme.primary;
     for (var language in langs ?? []) {
       if (language != null) {
@@ -29,7 +29,7 @@ class ListBooks extends StatelessWidget {
               shape: _shape,
               elevation: 3,
               backgroundColor: chipColor,
-              labelStyle: TextStyle(color: fontColor),
+              labelStyle: const TextStyle(color: fontColor),
             ),
           );
         } else if (language == "ru") {
@@ -38,7 +38,7 @@ class ListBooks extends StatelessWidget {
             label: const Text("Russian"),
             elevation: 3,
             backgroundColor: chipColor,
-            labelStyle: TextStyle(color: fontColor),
+            labelStyle: const TextStyle(color: fontColor),
           ));
         } else if (language == "fr") {
           chips.add(Chip(
@@ -46,7 +46,7 @@ class ListBooks extends StatelessWidget {
             label: const Text("French"),
             elevation: 3,
             backgroundColor: chipColor,
-            labelStyle: TextStyle(color: fontColor),
+            labelStyle: const TextStyle(color: fontColor),
           ));
         } else if (language == "de") {
           chips.add(Chip(
@@ -54,7 +54,7 @@ class ListBooks extends StatelessWidget {
             label: const Text("German"),
             elevation: 3,
             backgroundColor: chipColor,
-            labelStyle: TextStyle(color: fontColor),
+            labelStyle: const TextStyle(color: fontColor),
           ));
         } else if (language == "es") {
           chips.add(Chip(
@@ -62,7 +62,7 @@ class ListBooks extends StatelessWidget {
             label: const Text("Spanish"),
             elevation: 3,
             backgroundColor: chipColor,
-            labelStyle: TextStyle(color: fontColor),
+            labelStyle: const TextStyle(color: fontColor),
           ));
         } else if (language == "it") {
           chips.add(Chip(
@@ -70,7 +70,7 @@ class ListBooks extends StatelessWidget {
             label: const Text("Italian"),
             elevation: 3,
             backgroundColor: chipColor,
-            labelStyle: TextStyle(color: fontColor),
+            labelStyle: const TextStyle(color: fontColor),
           ));
         } else {
           chips.add(Chip(
@@ -78,7 +78,7 @@ class ListBooks extends StatelessWidget {
             label: const Text("English"),
             elevation: 3,
             backgroundColor: chipColor,
-            labelStyle: TextStyle(color: fontColor),
+            labelStyle: const TextStyle(color: fontColor),
           ));
         }
       }
@@ -114,6 +114,26 @@ class ListBooks extends StatelessWidget {
             listBooksData[index].title!, listBooksData[index].language!);
       }
     }
+  }
+
+  openDeleteAlert(
+      BuildContext context, List<MapEbookData> listBooksData, int index) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Text("Do you want to delete this book?"),
+              actions: [
+                ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Cancel")),
+                ElevatedButton(
+                    onPressed: () {
+                      deleteBook(listBooksData, index);
+                      Navigator.pop(context);
+                    },
+                    child: const Text("Delete book"))
+              ],
+            ));
   }
 
   @override
@@ -183,11 +203,14 @@ class ListBooks extends StatelessWidget {
                                       .colorScheme
                                       .background
                                       .withOpacity(0.6),
-                                  child: IconButton(
-                                    color: Colors.white,
-                                    onPressed: () =>
-                                        deleteBook(listBooksData, index),
-                                    icon: const Icon(Icons.delete),
+                                  child: Tooltip(
+                                    message: "Delete book",
+                                    child: IconButton(
+                                      color: Colors.white,
+                                      onPressed: () => openDeleteAlert(
+                                          context, listBooksData, index),
+                                      icon: const Icon(Icons.delete),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -231,79 +254,5 @@ class ListBooks extends StatelessWidget {
             }),
       );
     }
-  }
-}
-
-class OptionsTile extends StatelessWidget {
-  const OptionsTile({
-    Key? key,
-    required this.listBooks,
-    required this.callback,
-    required this.listBooksData,
-    required this.index,
-  }) : super(key: key);
-  final int index;
-  final List<Map> listBooks;
-  final Function callback;
-  final List<MapEbookData> listBooksData;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          IconButton(
-            onPressed: () async {
-              SharedPreferences sharedPreferences =
-                  await SharedPreferences.getInstance();
-              final List<String>? books =
-                  sharedPreferences.getStringList("books");
-              if (books != null) {
-                books.remove(json.encode(listBooks[index]));
-
-                sharedPreferences.setStringList('books', books);
-
-                callback(books.map((e) => json.decode(e) as Map).toList());
-                if (listBooksData[index].locationBook != null) {
-                  final file = File(listBooksData[index].locationBook!);
-                  if (file.existsSync()) {
-                    file.deleteSync();
-                  }
-                }
-                if (listBooksData[index].locationCover != null) {
-                  final fileImage = File(listBooksData[index].locationCover!);
-                  if (fileImage.existsSync()) {
-                    fileImage.deleteSync();
-                  }
-                }
-              }
-            },
-            icon: const Tooltip(
-              message: "Delete book from library",
-              child: Icon(Icons.delete),
-            ),
-          ),
-          IconButton(
-            onPressed: () async {
-              // SharedPreferences sharedPreferences =
-              //     await SharedPreferences.getInstance();
-              // final List<String>? books =
-              //     sharedPreferences
-              //         .getStringList("books");
-              // if (books != null) {
-              //   books.remove(
-              //       json.encode(listBooks[index]));
-              //   sharedPreferences.setStringList(
-              //       'books', books);
-              //   callback(books);
-              // }
-            },
-            icon: const Icon(Icons.favorite),
-          )
-        ],
-      ),
-    );
   }
 }
