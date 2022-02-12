@@ -1,16 +1,14 @@
 # final_babel_reader_app
 
-A new Flutter project.
+An ebook reader for language lerners.
 
-## Getting Started
+## Screenshots of features
 
-This project is a starting point for a Flutter application.
+### Read books in parallel
+![Read books from storage](https://user-images.githubusercontent.com/88752042/153717251-f0e5672d-58b5-40b8-b5ba-13eaa439aa79.jpg)
 
-A few resources to get you started if this is your first Flutter project:
+### See translation
+![Read translation](https://user-images.githubusercontent.com/88752042/153717254-7d190e75-d871-4783-95a4-a5dc1a7a45cf.jpg)
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Read books in your storage
+![Screenshot_20220212-091357](https://user-images.githubusercontent.com/88752042/153717259-4f793d85-0386-403a-bac9-a4943209ee67.jpg)
